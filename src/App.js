@@ -7,7 +7,7 @@ import AuthProvider from './contexts/auth';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/bld-gestor">
       <AuthProvider>
         <ToastContainer autoClose={3000}/>
         <RoutesApp />
