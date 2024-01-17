@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/bdl-gestor/static/css/main.0bef0a7a.css",
-    "main.js": "/bdl-gestor/static/js/main.435ed033.js",
+    "main.js": "/bdl-gestor/static/js/main.efdfbc53.js",
     "static/js/787.2c10cf9c.chunk.js": "/bdl-gestor/static/js/787.2c10cf9c.chunk.js",
     "static/media/cover.jpeg": "/bdl-gestor/static/media/cover.f4931b92f08dc7233385.jpeg",
     "static/media/logo.png": "/bdl-gestor/static/media/logo.4e14cc9938512c993092.png",
     "index.html": "/bdl-gestor/index.html",
     "main.0bef0a7a.css.map": "/bdl-gestor/static/css/main.0bef0a7a.css.map",
-    "main.435ed033.js.map": "/bdl-gestor/static/js/main.435ed033.js.map",
+    "main.efdfbc53.js.map": "/bdl-gestor/static/js/main.efdfbc53.js.map",
     "787.2c10cf9c.chunk.js.map": "/bdl-gestor/static/js/787.2c10cf9c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.0bef0a7a.css",
-    "static/js/main.435ed033.js"
+    "static/js/main.efdfbc53.js"
   ]
 }
