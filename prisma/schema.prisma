@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Show {
+  id               Int           @id @default(autoincrement())
+  contratanteId    Int
+  contratante      Contratante   @relation(fields: [contratanteId], references: [id])
+  musicos          Musico[]      // Relação com vários músicos
+  data_criacao     DateTime      @default(now())
+  data_atualizacao DateTime      @default(now())
+  data_show        DateTime
+  horario_show     DateTime
+  local            String
+  valor            Float
+  custo            Float?
+  status           Boolean
+  descricao        String?
+  valor_caixa      Float?
+  tipo_projeto     String
+}
+
+model Musico {
+  id               String        @id @default(cuid())
+  username         String        @unique
+  email            String?
+  password         String?
+  nome             String
+  sobrenome        String?
+  instrumento      String
+  funcao           String
+  telefone         String
+  cache_medio      Float?
+  pix              String?
+  data_criacao     DateTime      @default(now())
+  data_atualizacao DateTime      @updatedAt
+  Show Show[]
+}
+
+model Contratante {
+  id               Int           @id @default(autoincrement())
+  nome             String
+  contato          String
+  cidade           String
+  estado           String?
+  endereco         String?
+  telefone         String
+  email            String?
+  tipo             String
+  shows            Show[]        // Relação com vários shows
+  data_criacao     DateTime      @default(now())
+  data_atualizacao DateTime      @updatedAt
+}

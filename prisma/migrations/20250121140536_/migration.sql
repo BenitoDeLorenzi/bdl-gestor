@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Musico" ALTER COLUMN "cache_medio" SET DATA TYPE TEXT;

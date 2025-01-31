@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Show" ALTER COLUMN "data_atualizacao" SET DEFAULT CURRENT_TIMESTAMP;
