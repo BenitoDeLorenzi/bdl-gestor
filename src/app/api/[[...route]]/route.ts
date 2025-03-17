@@ -15,7 +15,7 @@ import projetos from "@/features/projetos/server/route";
 
 const app = new Hono().basePath("/api");
 
-export const routes = app
+const routes = app
   .route("/auth", auth)
   .route("/equipe", equipe)
   .route("/contratantes", contratantes)

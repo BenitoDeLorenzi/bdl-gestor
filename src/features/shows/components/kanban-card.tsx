@@ -27,7 +27,7 @@ export const KanbanCard = ({ show }: KanbanCardProps) => {
               : show.contratante.nome}
           </span>
         </div>
-        <ShowsActions id={show.$id}>
+        <ShowsActions id={show.$id} status={show.status}>
           <MoreHorizontalIcon className="size-[18px] stroke-1 shrink-0 text-neutral-700 hover:opacity-75 transition" />
         </ShowsActions>
       </div>
