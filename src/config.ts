@@ -1,0 +1,15 @@
+export const NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
+
+export const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
+export const EQUIPE_ID = process.env.NEXT_PUBLIC_APPWRITE_EQUIPE_ID!;
+export const CONTRATANTES_ID =
+  process.env.NEXT_PUBLIC_APPWRITE_CONTRATANTES_ID!;
+export const SHOWS_ID = process.env.NEXT_PUBLIC_APPWRITE_SHOWS_ID!;
+export const FATURAMENTOS_ID =
+  process.env.NEXT_PUBLIC_APPWRITE_FATURAMENTOS_ID!;
+export const LOCAIS_ID = process.env.NEXT_PUBLIC_APPWRITE_LOCAIS_ID!;
+export const TIPOS_ID = process.env.NEXT_PUBLIC_APPWRITE_TIPOS_ID!;
+export const USUARIOS_ID = process.env.NEXT_PUBLIC_APPWRITE_USUARIOS_ID!;
+export const PROJETOS_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJETOS_ID!;
+export const PROJETOS_FINANCAS_ID =
+  process.env.NEXT_PUBLIC_APPWRITE_PROJETOS_FINANCAS_ID!;
