@@ -33,11 +33,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { ListCheckIcon, PlusIcon, TriangleAlert } from "lucide-react";
+import { ListCheckIcon, Plus, TriangleAlert } from "lucide-react";
 import DottedSeparator from "@/components/dotted-separator";
 import { useCreateLocaisModal } from "../hooks/use-create-locais-modal";
 import { Locais } from "../types";
 import { Input } from "@/components/ui/input";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -48,6 +49,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const { isMobile } = useSidebar();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -65,6 +67,10 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
       columnFilters,
+      columnVisibility: {
+        tipo: isMobile ? false : true,
+        $createdAt: isMobile ? false : true,
+      },
     },
   });
 
@@ -75,7 +81,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="">
       <div className="flex flex-col gap-y-2 lg:flex-row justify-between items-center">
-        <div className="flex items-center gap-x-2">
+        <div className="flex flex-col lg:flex-row w-full lg:w-auto gap-2">
           <Input
             placeholder="Buscar local..."
             value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
@@ -111,8 +117,14 @@ export function DataTable<TData, TValue>({
             </SelectContent>
           </Select>
         </div>
-        <Button size="sm" className="w-full lg:w-auto" onClick={open}>
-          <PlusIcon className="size-4 mr-2" />
+        <Button
+          size="sm"
+          className="w-full lg:w-auto"
+          onClick={open}
+          effect="expandIcon"
+          icon={Plus}
+          iconPlacement="right"
+        >
           Novo
         </Button>
       </div>

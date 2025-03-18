@@ -25,7 +25,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
             quality={100}
           />
           <div className="flex items-center gap-2">
-            <Button variant="secondary" asChild>
+            <Button variant="secondary" asChild effect="ringHover">
               <Link href={pathname === "/sign-in" ? "sign-up" : "sign-in"}>
                 {pathname === "/sign-in" ? "Registrar" : "Entrar"}
               </Link>

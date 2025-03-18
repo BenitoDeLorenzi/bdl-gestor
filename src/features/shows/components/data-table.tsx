@@ -15,7 +15,6 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 import {
   Table,
@@ -26,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TriangleAlert } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,6 +36,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const { isMobile } = useSidebar();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -53,6 +54,14 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
       columnFilters,
+      columnVisibility: {
+        contratante: isMobile ? false : true,
+        cidade: isMobile ? false : true,
+        projeto: isMobile ? false : true,
+        data: isMobile ? false : true,
+        horario: isMobile ? false : true,
+        status: isMobile ? false : true,
+      },
     },
   });
 

@@ -30,6 +30,7 @@ import { FaFacebook } from "react-icons/fa";
 import { useLogin } from "../api/use-login";
 import { useState } from "react";
 import { signUpWithGoogle } from "@/lib/oauth";
+import { ArrowRightIcon } from "lucide-react";
 
 export const SignInCard = () => {
   const [error, setError] = useState("");
@@ -112,7 +113,14 @@ export const SignInCard = () => {
               )}
             />
 
-            <Button className="w-full" size="lg" disabled={isPending}>
+            <Button
+              className="w-full"
+              size="lg"
+              disabled={isPending}
+              effect="gooeyLeft"
+              icon={ArrowRightIcon}
+              iconPlacement="right"
+            >
               {isPending ? "Aguarde..." : "Entrar"}
             </Button>
           </form>
@@ -127,6 +135,7 @@ export const SignInCard = () => {
           size="lg"
           className="w-full"
           onClick={() => signUpWithGoogle()}
+          effect="ringHover"
         >
           <FcGoogle className="mr-2 size-5" />
           Entrar com Google
@@ -138,9 +147,11 @@ export const SignInCard = () => {
       <CardContent className="p-7 flex items-center justify-center">
         <p>
           Não tem uma conta?{" "}
-          <Link href="/sign-up">
-            <span className="text-blue-700">Registrar</span>
-          </Link>
+          <Button variant="link" effect="hoverUnderline" asChild>
+            <Link href="/sign-up">
+              <span className="text-blue-700">Registrar</span>
+            </Link>
+          </Button>
         </p>
       </CardContent>
     </Card>

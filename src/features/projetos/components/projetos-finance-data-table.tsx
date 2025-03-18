@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 
 import { TriangleAlert } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -36,6 +37,7 @@ export function ProjetosFinanceDataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const { isMobile } = useSidebar();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -54,6 +56,11 @@ export function ProjetosFinanceDataTable<TData, TValue>({
     state: {
       sorting,
       columnFilters,
+      columnVisibility: {
+        forma_pagamento: isMobile ? false : true,
+        data: isMobile ? false : true,
+        status: isMobile ? false : true,
+      },
     },
   });
 

@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { ArrowUpDown, MoreVertical } from "lucide-react";
 
-import { Shows } from "../types";
+import { Show, Shows } from "../types";
 import { Button } from "@/components/ui/button";
 
 import { ptBR } from "date-fns/locale";
@@ -15,7 +15,7 @@ import { ShowsActions } from "./shows-actions";
 
 export const columns: ColumnDef<Shows>[] = [
   {
-    accessorKey: "contratante.nome",
+    accessorKey: "contratante",
     header: ({ column }) => {
       return (
         <Button
@@ -27,9 +27,17 @@ export const columns: ColumnDef<Shows>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => {
+      const contratante =
+        typeof row.original.contratante === "string"
+          ? row.original.contratante
+          : row.original.contratante.nome;
+
+      return contratante;
+    },
   },
   {
-    accessorKey: "local.nome",
+    accessorKey: "local",
     header: ({ column }) => {
       return (
         <Button
@@ -41,9 +49,17 @@ export const columns: ColumnDef<Shows>[] = [
         </Button>
       );
     },
+    cell: ({ row }) => {
+      const local =
+        typeof row.original.local === "string"
+          ? row.original.local
+          : row.original.local.nome;
+
+      return local;
+    },
   },
   {
-    accessorKey: "local.cidade",
+    accessorKey: "cidade",
     header: ({ column }) => {
       return (
         <Button
@@ -54,6 +70,14 @@ export const columns: ColumnDef<Shows>[] = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+    cell: ({ row }) => {
+      const cidade =
+        typeof row.original.local === "string"
+          ? row.original.local
+          : row.original.local.cidade;
+
+      return cidade;
     },
   },
   {

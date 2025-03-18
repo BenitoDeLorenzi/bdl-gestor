@@ -16,6 +16,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   Briefcase,
@@ -41,9 +42,9 @@ import {
 
 import { useCreateProjetosModal } from "@/features/projetos/hooks/use-create-projetos-modal";
 import { useGetProjetos } from "@/features/projetos/api/use-get-projetos";
-import { Skeleton } from "./ui/skeleton";
 import { useDeleteProjetos } from "@/features/projetos/api/use-delete-projetos";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useEffect } from "react";
 
 const navMain = [
   {
@@ -106,13 +107,12 @@ const navConfig = [
 ];
 
 export function AppSidebar() {
+  const { setOpenMobile } = useSidebar();
   const router = useRouter();
   const pathname = usePathname();
   const { open } = useCreateProjetosModal();
   const { data: projetos, isLoading: isLoadingProjetos } = useGetProjetos();
   const { mutate, isPending: isPendingDelete } = useDeleteProjetos();
-
-  const isLoading = isLoadingProjetos || isPendingDelete;
 
   const [ConfirmDialog, confirm] = useConfirm(
     "Deseja excluir esse projeto?",
@@ -134,6 +134,10 @@ export function AppSidebar() {
       }
     );
   };
+
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
 
   return (
     <>
@@ -168,7 +172,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               </SidebarMenu>
               {navMain.map((item) => {
-                const isActive = pathname === item.href; // Uso do pathname aqui, fora do hook
+                const isActive = pathname === item.href;
 
                 return (
                   <SidebarMenu key={item.label}>
@@ -224,7 +228,7 @@ export function AppSidebar() {
                       key={item.title}
                       asChild
                       className="group/collapsible"
-                      defaultOpen={isGroupActive}
+                      defaultOpen={true}
                     >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>

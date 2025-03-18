@@ -8,7 +8,7 @@ import { DataFilters } from "./data-filter";
 import { DataKanban } from "./data-kanban";
 import { DataTable } from "./data-table";
 
-import { Loader, PlusIcon } from "lucide-react";
+import { Loader, Plus } from "lucide-react";
 
 import { useCallback } from "react";
 import { useQueryState } from "nuqs";
@@ -20,7 +20,6 @@ import { useShowsFilters } from "../hooks/use-shows-filters";
 import { ShowStatus } from "../types";
 import { columns } from "./columns";
 import { useGetShowsAnalytics } from "../api/use-get-shows-analytics";
-import { Analytics } from "@/components/analytics";
 
 export const ShowsViewSwitcher = () => {
   const { open } = useCreateShowModal();
@@ -42,9 +41,6 @@ export const ShowsViewSwitcher = () => {
     projeto,
   });
 
-  const { data: analytics, isLoading: isLoadingAnalytics } =
-    useGetShowsAnalytics();
-
   const onKanbanChange = useCallback(
     (shows: { $id: string; status: ShowStatus }[]) => {
       bulkUpdate({ json: { shows } });
@@ -59,7 +55,6 @@ export const ShowsViewSwitcher = () => {
       onValueChange={setView}
     >
       <div className="h-full flex flex-col overflow-auto p-4">
-        {/* {analytics && <Analytics data={analytics} />} */}
         <div className="flex flex-col gap-y-2 lg:flex-row justify-between items-center">
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger className="h-8 w-full lg:w-auto" value="table">
@@ -72,8 +67,14 @@ export const ShowsViewSwitcher = () => {
               Kanban
             </TabsTrigger>
           </TabsList>
-          <Button size="sm" className="w-full lg:w-auto" onClick={open}>
-            <PlusIcon className="size-4 mr-2" />
+          <Button
+            size="sm"
+            className="w-full lg:w-auto"
+            onClick={open}
+            effect="expandIcon"
+            icon={Plus}
+            iconPlacement="right"
+          >
             Novo
           </Button>
         </div>

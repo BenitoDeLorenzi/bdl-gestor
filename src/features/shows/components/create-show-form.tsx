@@ -360,7 +360,12 @@ export const CreateShowsForm = ({
               >
                 Cancelar
               </Button>
-              <Button size="lg" type="submit" disabled={isPending}>
+              <Button
+                size="lg"
+                type="submit"
+                loading={isPending}
+                effect="gooeyLeft"
+              >
                 {isPending ? "Aguarde..." : "Criar show"}
               </Button>
             </div>

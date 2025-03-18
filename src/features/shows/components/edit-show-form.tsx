@@ -379,7 +379,12 @@ export const EditShowForm = ({
               >
                 Cancelar
               </Button>
-              <Button size="lg" type="submit" disabled={isPending}>
+              <Button
+                size="lg"
+                type="submit"
+                loading={isPending}
+                effect="gooeyLeft"
+              >
                 {isPending ? "Aguarde..." : "Atualizar show"}
               </Button>
             </div>

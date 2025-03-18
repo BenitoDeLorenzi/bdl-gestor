@@ -279,8 +279,13 @@ export const EditLocalForm = ({
               >
                 Cancelar
               </Button>
-              <Button size="lg" type="submit" disabled={isPending}>
-                {isPending ? "Aguarde..." : "Atualizar"}
+              <Button
+                size="lg"
+                type="submit"
+                loading={isPending}
+                effect="gooeyLeft"
+              >
+                {isPending ? "Aguarde..." : "Atualizar local"}
               </Button>
             </div>
           </form>

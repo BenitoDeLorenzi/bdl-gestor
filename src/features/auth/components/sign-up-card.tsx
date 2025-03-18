@@ -140,7 +140,12 @@ const SignUpCard = () => {
               )}
             />
 
-            <Button className="w-full" size="lg" disabled={isPending}>
+            <Button
+              className="w-full"
+              size="lg"
+              disabled={isPending}
+              effect="gooeyLeft"
+            >
               {isPending ? "Aguarde..." : "Registrar"}
             </Button>
           </form>
@@ -150,13 +155,14 @@ const SignUpCard = () => {
         <DottedSeparator />
       </div>
       <CardContent className="p-7 flex flex-col gap-y-4">
-        <Button variant="outline" size="lg" className="w-full" disabled={false}>
+        <Button
+          variant="outline"
+          size="lg"
+          disabled={isPending}
+          effect="ringHover"
+        >
           <FcGoogle className="mr-2 size-5" />
           Entrar com Google
-        </Button>
-        <Button variant="outline" size="lg" className="w-full" disabled={false}>
-          <FaFacebook className="mr-2 size-5" />
-          Entrar com Facebook
         </Button>
       </CardContent>
       <div className="px-7">
@@ -165,9 +171,11 @@ const SignUpCard = () => {
       <CardContent className="p-7 flex items-center justify-center">
         <p>
           Já tem uma conta?{" "}
-          <Link href="/sign-in">
-            <span className="text-blue-700">Entrar</span>
-          </Link>
+          <Button variant="link" effect="hoverUnderline" asChild>
+            <Link href="/sign-in">
+              <span className="text-blue-700">Entrar</span>
+            </Link>
+          </Button>
         </p>
       </CardContent>
     </Card>

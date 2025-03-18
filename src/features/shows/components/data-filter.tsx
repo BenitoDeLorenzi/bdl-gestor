@@ -10,7 +10,7 @@ import {
   SelectSeparator,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase, ListCheckIcon, MapPin } from "lucide-react";
+import { Briefcase, Hammer, ListCheckIcon, MapPin } from "lucide-react";
 import { ShowStatus } from "../types";
 import { useShowsFilters } from "../hooks/use-shows-filters";
 import { useGetLocais } from "@/features/locais/api/use-get-locais";
@@ -136,7 +136,7 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
       >
         <SelectTrigger className="w-full lg:w-auto h-8">
           <div className="flex items-center pr-2">
-            <MapPin className="size-4 mr-2" />
+            <Hammer className="size-4 mr-2" />
             <SelectValue placeholder="Todos projetos" />
           </div>
         </SelectTrigger>
