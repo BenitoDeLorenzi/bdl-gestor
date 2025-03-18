@@ -51,7 +51,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <AppSidebar />
         <SidebarInset className="w-full">
           <Navbar />
-          <main className="h-full py-6 px-2 flex flex-col">{children}</main>
+          <main className="h-full py-6 px-3 flex flex-col">{children}</main>
         </SidebarInset>
       </SidebarProvider>
     </div>

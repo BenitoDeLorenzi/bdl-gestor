@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 
-import { ArrowUpDown, MoreVertical } from "lucide-react";
+import { ArrowUpDown, BadgeCheck, Circle, MoreVertical } from "lucide-react";
 
 import { Show, Shows } from "../types";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { ptBR } from "date-fns/locale";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { snakeCaseToTitleCase } from "@/lib/utils";
+import { cn, snakeCaseToTitleCase } from "@/lib/utils";
 import { ShowsActions } from "./shows-actions";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export const columns: ColumnDef<Shows>[] = [
   {
@@ -50,12 +51,38 @@ export const columns: ColumnDef<Shows>[] = [
       );
     },
     cell: ({ row }) => {
+      const { isMobile } = useSidebar();
+      const data = format(row.original.data, "dd/MM/yyyy", { locale: ptBR });
+      const status = row.original.status;
       const local =
         typeof row.original.local === "string"
           ? row.original.local
           : row.original.local.nome;
 
-      return local;
+      return (
+        <div className="flex items-center gap-2">
+          {isMobile && (
+            <BadgeCheck
+              className={cn(
+                "size-5 stroke-white",
+                status === "PENDENTE"
+                  ? "fill-amber-500"
+                  : status === "CONFIRMADO"
+                  ? "fill-blue-500"
+                  : status === "FINALIZADO"
+                  ? "fill-green-500"
+                  : "fill-gray-500"
+              )}
+            />
+          )}
+          <div className="flex flex-col">
+            <span>{local}</span>
+            {isMobile && (
+              <p className="text-xs text-muted-foreground">{data}</p>
+            )}
+          </div>
+        </div>
+      );
     },
   },
   {
@@ -169,7 +196,9 @@ export const columns: ColumnDef<Shows>[] = [
       );
     },
     cell: ({ row }) => {
+      const { isMobile } = useSidebar();
       const status = row.original.status;
+
       return <Badge variant={status}>{snakeCaseToTitleCase(status)}</Badge>;
     },
   },
