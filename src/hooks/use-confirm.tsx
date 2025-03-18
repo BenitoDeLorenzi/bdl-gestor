@@ -15,7 +15,7 @@ import {
 export const useConfirm = (
   title: string,
   message: string,
-  variant: ButtonProps["variant"] = "primary",
+  variant: ButtonProps["variant"] = "default",
   isLoading?: boolean
 ): [() => JSX.Element, () => Promise<unknown>] => {
   const [promisse, setPromisse] = useState<{
@@ -63,6 +63,7 @@ export const useConfirm = (
                 onClick={handleConfirm}
                 variant={variant}
                 className="w-full lg:w-auto"
+                loading={isLoading}
               >
                 Confirmar
               </Button>
