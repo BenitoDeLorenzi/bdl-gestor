@@ -47,3 +47,20 @@ export type ProjetosFinance = Models.Document & {
   user_id: string;
   obecervacoes: string;
 };
+
+export type ProjetosMessages = Models.Document & {
+  tipo: string;
+  razao_social: string;
+  cnpj: string;
+  cep: string;
+  uf: string;
+  cidade: string;
+  logradouro: string;
+  telefone: string;
+  representante_nome: string;
+  representante_cpf: string;
+  box: string[];
+  termos: boolean;
+  email: string;
+  projeto: string;
+};

@@ -1,12 +1,16 @@
-import { DATABASE_ID, PROJETOS_FINANCAS_ID, PROJETOS_ID } from "@/config";
+import {
+  DATABASE_ID,
+  PROJETOS_FINANCAS_ID,
+  PROJETOS_ID,
+  PROJETOS_MENSAGENS_ID,
+} from "@/config";
 import { sessionMiddleware } from "@/lib/session-middleware";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { ID, Query } from "node-appwrite";
 import { z } from "zod";
-import { Projetos, ProjetosFinance } from "../types";
+import { Projetos, ProjetosFinance, ProjetosMessages } from "../types";
 import { createProjetosFinanceSchema } from "../schemas";
-import { createAdminClient } from "@/lib/appwrite";
 import { getCurrent } from "@/features/auth/queries";
 
 const app = new Hono()
@@ -39,7 +43,11 @@ const app = new Hono()
     const projetoFinance = await databases.listDocuments<ProjetosFinance>(
       DATABASE_ID,
       PROJETOS_FINANCAS_ID,
-      [Query.equal("projeto_id", projetoId), Query.orderDesc("data")]
+      [
+        Query.equal("projeto_id", projetoId),
+        Query.orderDesc("data"),
+        Query.limit(1000),
+      ]
     );
 
     return c.json({ data: projetoFinance });
@@ -63,36 +71,72 @@ const app = new Hono()
     const finance = await databases.listDocuments<ProjetosFinance>(
       DATABASE_ID,
       PROJETOS_FINANCAS_ID,
-      [Query.equal("projeto_id", projetoId), Query.equal("status", "PAGO")]
+      [Query.equal("projeto_id", projetoId), Query.limit(1000)]
     );
 
-    const valorEntradas = finance.documents.reduce(
-      (acc, item) => (item.tipo === "ENTRADA" ? acc + item.valor : acc),
+    const valorEntradasPago = finance.documents.reduce(
+      (acc, item) =>
+        item.tipo === "ENTRADA" && item.status === "PAGO"
+          ? acc + item.valor
+          : acc,
       0
     );
-    const valorSaidas = finance.documents.reduce(
-      (acc, item) => (item.tipo === "SAIDA" ? acc + item.valor : acc),
+
+    const valorEntradasPendente = finance.documents.reduce(
+      (acc, item) =>
+        item.tipo === "ENTRADA" && item.status === "PENDENTE"
+          ? acc + item.valor
+          : acc,
       0
     );
 
-    const totalEntradas = finance.documents.filter(
-      (item) => item.tipo === "ENTRADA"
-    ).length;
+    const valorSaidasPago = finance.documents.reduce(
+      (acc, item) =>
+        item.tipo === "SAIDA" && item.status === "PAGO"
+          ? acc + item.valor
+          : acc,
+      0
+    );
 
-    const totalSaidas = finance.documents.filter(
-      (item) => item.tipo === "SAIDA"
-    ).length;
+    const valorSaidasPendente = finance.documents.reduce(
+      (acc, item) =>
+        item.tipo === "SAIDA" && item.status === "PENDENTE"
+          ? acc + item.valor
+          : acc,
+      0
+    );
 
     return c.json({
       data: {
-        entradas: { valor: valorEntradas, total: totalEntradas },
-        saidas: { valor: valorSaidas, total: totalSaidas },
+        pendente: {
+          saida: valorSaidasPendente,
+          entrada: valorEntradasPendente,
+        },
+        pago: {
+          saida: valorSaidasPago,
+          entrada: valorEntradasPago,
+        },
+        previsto: {
+          custo: valorSaidasPago + valorSaidasPendente,
+          saldo: valorEntradasPago + valorEntradasPendente,
+        },
         saldo: {
-          valor: valorEntradas - valorSaidas,
-          total: finance.documents.length,
+          valor: valorEntradasPago - valorSaidasPago,
         },
       },
     });
+  })
+  .get("/messages/:projetoNome", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const { projetoNome } = c.req.param();
+
+    const messages = await databases.listDocuments<ProjetosMessages>(
+      DATABASE_ID,
+      PROJETOS_MENSAGENS_ID,
+      [Query.equal("projeto", projetoNome)]
+    );
+
+    return c.json({ data: messages });
   })
   .post(
     "/",

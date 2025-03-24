@@ -11,6 +11,9 @@ import { useGetProjetosFinance } from "../api/use-get-projetos-finance";
 import { ProjetosFinanceDataTable } from "./projetos-finance-data-table";
 import { projetosFinanceColumns } from "./projetos-finance-columns";
 import { ProjetosFinanceAnalytics } from "./projetos-finance-analytics";
+import { useGetProjetosMessages } from "../api/use-get-projetos-messages";
+import { ProjetosMessagesDataTable } from "./projetos-messages-data-table";
+import { projetosMessagesColumns } from "./projetos-messages-columns";
 
 interface ProjetosViewSwitcherProps {
   projetoId: string;
@@ -28,11 +31,17 @@ export const ProjetosViewSwitcher = ({
   const { data: projetoFinance, isLoading: isLoadingProjetoFinance } =
     useGetProjetosFinance({ projetoId: projetoId });
 
+  const { data: projetoMessages, isLoading: isLoadingProjetoMessages } =
+    useGetProjetosMessages({ projetoNome: projeto?.nome || "" });
+
   const [view, setView] = useQueryState("projeto-view", {
     defaultValue: "finance",
   });
 
-  const isLoading = isLoadingProjeto || isLoadingProjetoFinance;
+  const isLoading =
+    isLoadingProjeto || isLoadingProjetoFinance || isLoadingProjetoMessages;
+
+  console.log(projetoFinance);
 
   return (
     <Tabs
@@ -69,14 +78,14 @@ export const ProjetosViewSwitcher = ({
             </Button>
           )}
         </div>
-        <DottedSeparator className="mt-4" />
+        <DottedSeparator className="py-2" />
         {isLoading ? (
           <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
             <Loader className="size-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <>
-            <TabsContent value="finance" className="mt-0">
+            <TabsContent value="finance">
               <ProjetosFinanceAnalytics projetoId={projetoId} />
               <ProjetosFinanceDataTable
                 columns={projetosFinanceColumns}
@@ -84,7 +93,10 @@ export const ProjetosViewSwitcher = ({
               />
             </TabsContent>
             <TabsContent value="message" className="mt-0">
-              Mensagens
+              <ProjetosMessagesDataTable
+                columns={projetosMessagesColumns}
+                data={projetoMessages?.documents || []}
+              />
             </TabsContent>
           </>
         )}
