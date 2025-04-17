@@ -4,7 +4,13 @@ import DottedSeparator from "@/components/dotted-separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useUpdatePerfilEmail } from "@/features/perfil/api/use-update-email";
 import { useUpdatePerfilName } from "@/features/perfil/api/use-update-name";
 import { useUpdatePerfilPassword } from "@/features/perfil/api/use-update-password";
@@ -14,6 +20,8 @@ import { Usuarios } from "@/features/usuarios/types";
 import { getInitials } from "@/lib/utils";
 import { format } from "date-fns";
 import { useForm, FormProvider } from "react-hook-form";
+import { useConnectGoogleCalendar } from "../api/use-connect-google-calendar";
+import { useDisconnectGoogleCalendar } from "../api/use-disconnect-google-calendar";
 
 interface PerfilClientPageProps {
   user: Usuarios;
@@ -35,6 +43,12 @@ export const PerfilView = ({ user }: PerfilClientPageProps) => {
     useUpdatePerfilPhone();
   const { mutate: mutatePassword, isPending: isPendingPassword } =
     useUpdatePerfilPassword();
+  const {
+    mutate: connectGoogleCalendar,
+    isPending: isPendingConnectGoogleCalendar,
+  } = useConnectGoogleCalendar();
+  const { mutate: disconnectGoogleCalendar, isPending: isPendingDisconnect } =
+    useDisconnectGoogleCalendar();
 
   const form = useForm<PerfilFormData>({
     defaultValues: {
@@ -111,6 +125,14 @@ export const PerfilView = ({ user }: PerfilClientPageProps) => {
     );
   };
 
+  const handleConnectGoogleCalendar = () => {
+    if (!user.prefs.googleAccessToken) {
+      connectGoogleCalendar();
+    } else {
+      disconnectGoogleCalendar();
+    }
+  };
+
   return (
     <FormProvider {...form}>
       <div className="flex flex-col gap-6">
@@ -155,8 +177,31 @@ export const PerfilView = ({ user }: PerfilClientPageProps) => {
             </div>
             <DottedSeparator className="py-4" />
             <div className="flex justify-end gap-4">
-              <Button variant="ghost">Bloquear conta</Button>
               <Button>Verificar</Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="w-full">
+          <CardContent className="p-5">
+            <CardHeader className="p-0">
+              <CardTitle>Google Calendar</CardTitle>
+              <CardDescription>
+                Conectar ao Google Calendar para vincular os shows salvos ao seu
+                calendário do google.
+              </CardDescription>
+            </CardHeader>
+            <DottedSeparator className="py-4" />
+            <div className="flex justify-end gap-4">
+              <Button
+                onClick={handleConnectGoogleCalendar}
+                variant={
+                  user.prefs.googleAccessToken ? "destructive" : "default"
+                }
+                disabled={isPendingConnectGoogleCalendar || isPendingDisconnect}
+              >
+                {user.prefs.googleAccessToken ? "Desconectar" : "Conectar"}
+              </Button>
             </div>
           </CardContent>
         </Card>

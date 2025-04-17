@@ -17,8 +17,8 @@ export const useCreateEquipe = () => {
       const response = await client.api.equipe["$post"]({ json });
 
       if (!response.ok) {
-        console.log(response);
-        throw new Error("Erro ao criar membro da equipe.");
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data?.error ?? "Erro ao criar mebro da equipe.");
       }
 
       return await response.json();
@@ -26,10 +26,7 @@ export const useCreateEquipe = () => {
     onSuccess: () => {
       toast.success("Membro da equipe criado com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["equipe"] });
-      router.push("/equipe");
-    },
-    onError: (error) => {
-      toast.error(error.message);
+      router.refresh();
     },
   });
 

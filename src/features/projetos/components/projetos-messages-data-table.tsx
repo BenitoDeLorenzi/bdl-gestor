@@ -61,7 +61,7 @@ export function ProjetosMessagesDataTable<TData, TValue>({
   });
 
   return (
-    <div className="">
+    <div className="h-full overflow-y-auto">
       <div className="rounded-md border">
         <Table>
           <TableHeader>

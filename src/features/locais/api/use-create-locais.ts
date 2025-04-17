@@ -17,19 +17,16 @@ export const useCreateLocais = () => {
       const response = await client.api.locais["$post"]({ json });
 
       if (!response.ok) {
-        console.log(response);
-        throw new Error("Erro ao criar local.");
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data?.error ?? "Erro ao criar local.");
       }
 
       return await response.json();
     },
     onSuccess: () => {
       toast.success("Local criado com sucesso!");
-      router.refresh();
       queryClient.invalidateQueries({ queryKey: ["locais"] });
-    },
-    onError: (error) => {
-      toast.error(error.message);
+      router.refresh();
     },
   });
 

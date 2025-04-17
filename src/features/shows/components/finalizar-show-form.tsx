@@ -27,7 +27,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import { useUpdateShow } from "../api/use-update-show";
 import { Contratante } from "@/features/contratantes/types";
 import { Locais } from "@/features/locais/types";
 import { Equipe } from "@/features/equipe/types";
@@ -35,6 +34,8 @@ import { CirclePlus, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { DateTimePicker } from "@/components/date-time-picker";
 import { useCreateFaturamento } from "../api/use-create-faturamento";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface FinalizarShowFormProps {
   onCancel?: () => void;
@@ -44,6 +45,7 @@ interface FinalizarShowFormProps {
     contratante: Contratante;
     local: Locais;
     equipe: Equipe[];
+    data: string;
   };
 }
 
@@ -61,6 +63,7 @@ export const FinalizarShowForm = ({
   onCancel,
   initialValues,
 }: FinalizarShowFormProps) => {
+  const router = useRouter();
   const { mutate, isPending } = useCreateFaturamento();
 
   const form = useForm<z.infer<typeof createFaturamentoSchema>>({
@@ -69,7 +72,7 @@ export const FinalizarShowForm = ({
       show_id: initialValues.$id,
       valor: initialValues.valor,
       valor_recebido: initialValues.valor,
-      data_pagamento: new Date(),
+      data_pagamento: new Date(initialValues.data),
       despesa_musicos: initialValues.equipe.map((membro) => ({
         $id: membro.$id || "",
         nome: membro.nome || "",
@@ -112,6 +115,25 @@ export const FinalizarShowForm = ({
         onSuccess: () => {
           form.reset();
           onCancel?.();
+        },
+        onError: (error) => {
+          if (
+            error.message.includes("plano") ||
+            error.message.includes("Plano")
+          ) {
+            onCancel?.();
+            toast.warning(error.message, {
+              duration: Infinity,
+              action: {
+                label: "Planos",
+                onClick: () => {
+                  router.push("/planos");
+                },
+              },
+            });
+          } else {
+            toast.error(error.message);
+          }
         },
       }
     );

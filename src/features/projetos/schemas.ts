@@ -15,4 +15,10 @@ export const createProjetosFinanceSchema = z.object({
   forma_pagamento: z.string().nonempty("A forma de pagamento é obrigatória"),
   descricao: z.string().nonempty("A descrição é obrigatória"),
   obecervacoes: z.string().optional(),
+  categoria: z.string().nonempty("A categoria é obrigatória."),
+});
+
+export const createProjetosCategoriasSchema = z.object({
+  projeto_id: z.string(),
+  nome: z.string().nonempty("O nome é obrigatório"),
 });

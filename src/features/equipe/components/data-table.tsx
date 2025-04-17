@@ -14,8 +14,6 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 
-import { Button } from "@/components/ui/button";
-
 import {
   Table,
   TableBody,
@@ -25,19 +23,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TriangleAlert } from "lucide-react";
 
-import { Guitar, Hammer, Plus, TriangleAlert } from "lucide-react";
-import DottedSeparator from "@/components/dotted-separator";
-import { Input } from "@/components/ui/input";
-import { useCreateEquipeModal } from "../hooks/use-create-equipe-modal";
-import { Equipe } from "../types";
 import { useSidebar } from "@/components/ui/sidebar";
 
 interface DataTableProps<TData, TValue> {
@@ -76,87 +63,8 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const { open } = useCreateEquipeModal();
-
-  const equipe = data as Equipe[];
-
   return (
     <div className="">
-      <div className="flex flex-col gap-y-2 lg:flex-row justify-between items-center">
-        <div className="flex flex-col lg:flex-row w-full lg:w-auto gap-2">
-          <Input
-            placeholder="Buscar membro da equipe..."
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("nome")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm h-8"
-          />
-          <Select
-            onValueChange={(value) => {
-              if (value === "all") {
-                table.getColumn("funcao")?.setFilterValue([]);
-              } else {
-                table.getColumn("funcao")?.setFilterValue(value);
-              }
-            }}
-          >
-            <SelectTrigger className="w-full lg:w-auto h-8">
-              <div className="flex items-center pr-2">
-                <Hammer className="size-4 mr-2" />
-                <SelectValue placeholder="Todas funções" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas funções</SelectItem>
-              {Array.from(
-                new Map(equipe.map((item) => [item.funcao, item])).values()
-              ).map((item) => (
-                <SelectItem key={item.funcao} value={item.funcao}>
-                  {item.funcao}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            onValueChange={(value) => {
-              if (value === "all") {
-                table.getColumn("instrumento")?.setFilterValue([]);
-              } else {
-                table.getColumn("instrumento")?.setFilterValue(value);
-              }
-            }}
-          >
-            <SelectTrigger className="w-full lg:w-auto h-8">
-              <div className="flex items-center pr-2">
-                <Guitar className="size-4 mr-2" />
-                <SelectValue placeholder="Todos instrumentos" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos instrumentos</SelectItem>
-              {Array.from(
-                new Map(equipe.map((item) => [item.instrumento, item])).values()
-              ).map((item) => (
-                <SelectItem key={item.instrumento} value={item.instrumento}>
-                  {item.instrumento}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button
-          size="sm"
-          className="w-full lg:w-auto"
-          onClick={open}
-          effect="expandIcon"
-          icon={Plus}
-          iconPlacement="right"
-        >
-          Novo
-        </Button>
-      </div>
-      <DottedSeparator className="my-4" />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -209,24 +117,6 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Anterior
-        </Button>
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Próximo
-        </Button>
       </div>
     </div>
   );

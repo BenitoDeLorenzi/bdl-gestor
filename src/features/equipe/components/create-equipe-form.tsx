@@ -29,6 +29,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCreateEquipe } from "../api/use-create-equipe";
 import { Tipos } from "@/features/tipos/types";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface CreateEquipeFormProps {
   onCancel?: () => void;
@@ -41,6 +43,7 @@ export const CreateEquipeForm = ({
   funcoesOpt,
   instrumentosOpt,
 }: CreateEquipeFormProps) => {
+  const router = useRouter();
   const { mutate, isPending } = useCreateEquipe();
 
   const form = useForm({
@@ -59,8 +62,34 @@ export const CreateEquipeForm = ({
   });
 
   const onSubmit = (values: z.infer<typeof createEquipeSchema>) => {
-    console.log(values);
-    mutate({ json: values });
+    mutate(
+      { json: values },
+      {
+        onSuccess: () => {
+          form.reset();
+          onCancel?.();
+        },
+        onError: (error) => {
+          if (
+            error.message.includes("plano") ||
+            error.message.includes("Plano")
+          ) {
+            onCancel?.();
+            toast.warning(error.message, {
+              duration: Infinity,
+              action: {
+                label: "Planos",
+                onClick: () => {
+                  router.push("/planos");
+                },
+              },
+            });
+          } else {
+            toast.error(error.message);
+          }
+        },
+      }
+    );
   };
 
   return (

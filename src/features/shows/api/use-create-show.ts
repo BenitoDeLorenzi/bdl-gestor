@@ -17,9 +17,8 @@ export const useCreateShows = () => {
       const response = await client.api.shows["$post"]({ json });
 
       if (!response.ok) {
-        const error = await response.json();
-        console.log(error);
-        throw new Error("Erro ao criar show.");
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data?.error ?? "Erro ao criar show.");
       }
 
       return await response.json();
@@ -30,9 +29,6 @@ export const useCreateShows = () => {
       queryClient.invalidateQueries({ queryKey: ["shows"] });
       queryClient.invalidateQueries({ queryKey: ["shows-analytics"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
-    },
-    onError: (error) => {
-      toast.error(error.message);
     },
   });
 

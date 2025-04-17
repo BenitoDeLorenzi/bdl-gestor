@@ -3,7 +3,8 @@
 import { ResponsiveModal } from "@/components/responsive-modal";
 
 import { useCreateProjetosFinanceModal } from "../hooks/use-create-projetos-finance-modal";
-import { CreateProjetosFinanceForm } from "./create-projeto-finance-form";
+
+import { CreateProjetosFinanceFormWrapper } from "./create-projeto-finance-form-wrapper";
 
 export const CreateProjetoFinanceModal = () => {
   const { projetoId, close } = useCreateProjetosFinanceModal();
@@ -11,7 +12,10 @@ export const CreateProjetoFinanceModal = () => {
   return (
     <ResponsiveModal open={!!projetoId} onOpenChange={close}>
       {projetoId && (
-        <CreateProjetosFinanceForm onCancel={close} projetoId={projetoId} />
+        <CreateProjetosFinanceFormWrapper
+          onCancel={close}
+          projetoId={projetoId}
+        />
       )}
     </ResponsiveModal>
   );

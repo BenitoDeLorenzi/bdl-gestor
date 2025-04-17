@@ -24,7 +24,7 @@ export const useGetDashboardAnalytics = ({
       if (!response.ok) {
         const error = await response.json();
         console.log(error);
-        throw new Error("Falha ao buscar o dados.");
+        throw new Error("Falha ao buscar o dados analytics.");
       }
 
       const { data } = await response.json();

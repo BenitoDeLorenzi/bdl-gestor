@@ -6,19 +6,48 @@ import { CONTRATANTES_ID, DATABASE_ID, SHOWS_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { createContratantesSchema } from "../schemas";
 import { Contratante } from "../types";
+import { z } from "zod";
+import { getCurrent } from "@/features/auth/queries";
+import { planMiddleware } from "@/lib/plan-middleware";
 
 const app = new Hono()
-  .get("/", sessionMiddleware, async (c) => {
-    const databases = c.get("databases");
+  .get(
+    "/",
+    sessionMiddleware,
+    zValidator(
+      "query",
+      z.object({
+        page: z.string(),
+        totalItems: z.string(),
+        search: z.string().nullish(),
+      })
+    ),
+    async (c) => {
+      const user = await getCurrent();
+      const databases = c.get("databases");
+      const { page, totalItems, search } = c.req.valid("query");
 
-    const contratantes = await databases.listDocuments<Contratante>(
-      DATABASE_ID,
-      CONTRATANTES_ID,
-      [Query.orderAsc("nome")]
-    );
+      const offSet = (parseInt(page) - 1) * parseInt(totalItems);
+      const limit = parseInt(totalItems);
 
-    return c.json({ data: contratantes });
-  })
+      const query = [
+        Query.orderAsc("nome"),
+        Query.limit(limit),
+        Query.offset(offSet),
+        Query.equal("user_id", user?.$id || ""),
+      ];
+
+      if (search) query.push(Query.contains("nome", search));
+
+      const contratantes = await databases.listDocuments<Contratante>(
+        DATABASE_ID,
+        CONTRATANTES_ID,
+        query
+      );
+
+      return c.json({ data: contratantes });
+    }
+  )
   .get("/:contratanteId", sessionMiddleware, async (c) => {
     const { contratanteId } = c.req.param();
     const databases = c.get("databases");
@@ -35,15 +64,17 @@ const app = new Hono()
     "/",
     zValidator("json", createContratantesSchema),
     sessionMiddleware,
+    planMiddleware,
     async (c) => {
+      const user = await getCurrent();
       const databases = c.get("databases");
-      const data = c.req.valid("json");
+      const values = c.req.valid("json");
 
       const contratantes = await databases.createDocument(
         DATABASE_ID,
         CONTRATANTES_ID,
         ID.unique(),
-        data
+        { ...values, user_id: user?.$id }
       );
 
       return c.json({ data: contratantes });

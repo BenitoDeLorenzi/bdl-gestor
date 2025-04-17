@@ -19,7 +19,7 @@ export const PerfilSessoesView = ({ userId }: PerfilSessoesViewProps) => {
     <Card className="p-2">
       {isLoading ? (
         <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
-          <Loader className="size-5 animate-spin text-muted-foreground" />
+          <Loader className="size-7 animate-spin text-muted-foreground" />
         </div>
       ) : (
         <SessionsDataTable

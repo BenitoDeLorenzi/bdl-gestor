@@ -15,7 +15,7 @@ export const UsuariosView = () => {
       <div className="h-full flex flex-col overflow-auto p-4">
         {isLoadingUsuarios ? (
           <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
-            <Loader className="size-5 animate-spin text-muted-foreground" />
+            <Loader className="size-7 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <DataTable columns={columns} data={usuarios?.users || []} />

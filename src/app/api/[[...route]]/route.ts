@@ -12,6 +12,7 @@ import usuarios from "@/features/usuarios/server/route";
 import perfil from "@/features/perfil/server/route";
 import dashboard from "@/features/dashboard/server/route";
 import projetos from "@/features/projetos/server/route";
+import planos from "@/features/planos/server/route";
 
 const app = new Hono().basePath("/api");
 
@@ -26,7 +27,8 @@ const routes = app
   .route("/usuarios", usuarios)
   .route("/perfil", perfil)
   .route("/dashboard", dashboard)
-  .route("/projetos", projetos);
+  .route("/projetos", projetos)
+  .route("/planos", planos);
 
 export const GET = handle(app);
 export const POST = handle(app);

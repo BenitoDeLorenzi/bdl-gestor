@@ -1,7 +1,5 @@
 import { useGetContratantes } from "@/features/contratantes/api/use-get-contratantes";
 
-import { DateTimePicker } from "@/components/date-time-picker";
-
 import {
   Select,
   SelectContent,
@@ -15,17 +13,22 @@ import { ShowStatus } from "../types";
 import { useShowsFilters } from "../hooks/use-shows-filters";
 import { useGetLocais } from "@/features/locais/api/use-get-locais";
 import { useGetTipos } from "@/features/tipos/api/use-get-tipos";
+import { ShowsYearNavigate } from "./shows-year-navigate";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface DataFiltersProps {
-  hideProjectFilter?: boolean;
-}
-
-export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
+export const DataFilters = () => {
   const { data: contratantes, isLoading: isLoadingContratantes } =
-    useGetContratantes();
-  const { data: locais, isLoading: isLoadingLocais } = useGetLocais();
+    useGetContratantes({ page: 1, totalItems: 1000 });
+
+  const { data: locais, isLoading: isLoadingLocais } = useGetLocais({
+    page: 1,
+    totalItems: 1000,
+  });
+
   const { data: projetos, isLoading: isLoadingProjetos } = useGetTipos({
     tipo: "projetos",
+    page: 1,
+    totalItems: 1000,
   });
 
   const contratantesOptions = contratantes?.documents.map((c) => ({
@@ -46,29 +49,43 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
   const isLoading =
     isLoadingContratantes || isLoadingLocais || isLoadingProjetos;
 
-  const [{ status, contratanteId, local, date, projeto, search }, setFilters] =
+  const [{ status, contratanteId, local, ano, projeto }, setFilters] =
     useShowsFilters();
 
   const onStatusChange = (value: string) => {
+    setFilters({ page: "1" });
     setFilters({ status: value === "all" ? null : (value as ShowStatus) });
   };
 
   const onContratanteChange = (value: string) => {
+    setFilters({ page: "1" });
     setFilters({ contratanteId: value === "all" ? null : (value as string) });
   };
 
   const onLocalChange = (value: string) => {
+    setFilters({ page: "1" });
     setFilters({ local: value === "all" ? null : (value as string) });
   };
 
   const onProjetosChange = (value: string) => {
+    setFilters({ page: "1" });
     setFilters({ projeto: value === "all" ? null : (value as string) });
   };
 
-  if (isLoading) return null;
+  const onAnoChange = (action: "PREV" | "NEXT" | "TODAY") => {
+    const year = parseInt(ano);
+    if (action === "PREV") setFilters({ ano: String(year - 1) });
+    if (action === "NEXT") setFilters({ ano: String(year + 1) });
+    setFilters({ page: "1" });
+  };
+
+  if (isLoading) {
+    return <Skeleton className="h-9 w-full mr-4" />;
+  }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-2">
+    <div className="flex flex-col lg:flex-row lg:items-center gap-2 w-full">
+      <ShowsYearNavigate ano={ano} onNavigate={onAnoChange} />
       <Select
         defaultValue={status ?? undefined}
         onValueChange={(value) => onStatusChange(value)}
@@ -150,17 +167,6 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
           ))}
         </SelectContent>
       </Select>
-
-      <DateTimePicker
-        className="w-full lg:w-auto h-8"
-        placeholder="Selecione uma data"
-        granularity="day"
-        value={date ? new Date(date) : undefined}
-        onChange={(date) => {
-          setFilters({ date: date ? date.toISOString() : null });
-        }}
-        displayFormat={{ hour24: "dd, MMMM yyyy" }}
-      />
     </div>
   );
 };

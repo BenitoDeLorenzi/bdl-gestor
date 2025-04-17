@@ -20,9 +20,15 @@ export const EditShowFormWrapper = ({
     { showId: id }
   );
   const { data: contratantes, isLoading: isLoadingContratantes } =
-    useGetContratantes();
-  const { data: equipe, isLoading: isLoadingEquipe } = useGetEquipe();
-  const { data: locais, isLoading: isLoadingLocais } = useGetLocais();
+    useGetContratantes({ page: 1, totalItems: 50 });
+  const { data: equipe, isLoading: isLoadingEquipe } = useGetEquipe({
+    page: 1,
+    totalItems: 50,
+  });
+  const { data: locais, isLoading: isLoadingLocais } = useGetLocais({
+    page: 1,
+    totalItems: 50,
+  });
 
   const contratantesOptions = contratantes?.documents.map((contratante) => ({
     nome: contratante.nome,
@@ -40,7 +46,7 @@ export const EditShowFormWrapper = ({
   }));
 
   const { data: projetosOptions, isLoading: isLoadingProjetoOptions } =
-    useGetTipos({ tipo: "projetos" });
+    useGetTipos({ tipo: "projetos", page: 1, totalItems: 1000 });
 
   const isLoading =
     isLoadingContratantes ||
@@ -52,7 +58,7 @@ export const EditShowFormWrapper = ({
     return (
       <Card className="w-full h-[714px] border-none shadow-none">
         <CardContent className="flex items-center justify-center h-full">
-          <Loader className="size-5 animate-spin text-muted-foreground" />
+          <Loader className="size-7 animate-spin text-muted-foreground" />
         </CardContent>
       </Card>
     );

@@ -7,8 +7,9 @@ export const useShowsFilters = () => {
     contratanteId: parseAsString,
     status: parseAsStringEnum(Object.values(ShowStatus)),
     search: parseAsString,
-    date: parseAsString,
+    ano: parseAsString.withDefault(new Date().getFullYear().toString()),
     local: parseAsString,
     projeto: parseAsString,
+    page: parseAsString,
   });
 };

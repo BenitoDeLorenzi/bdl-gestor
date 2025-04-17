@@ -5,16 +5,33 @@ import { ID, Query } from "node-appwrite";
 import { Tipos } from "../types";
 import { zValidator } from "@hono/zod-validator";
 import { createTiposSchema } from "../schemas";
+import { getCurrent } from "@/features/auth/queries";
+import { planMiddleware } from "@/lib/plan-middleware";
 
 const app = new Hono()
   .get("/", sessionMiddleware, async (c) => {
+    const user = await getCurrent();
     const databases = c.get("databases");
-    const { tipo } = c.req.query();
+    const { tipo, page, totalItems, search } = c.req.query();
 
-    const tipos = await databases.listDocuments<Tipos>(DATABASE_ID, TIPOS_ID, [
+    const offSet = (parseInt(page) - 1) * parseInt(totalItems);
+    const limit = parseInt(totalItems);
+
+    const query = [
+      Query.equal("user_id", user?.$id || ""),
       Query.equal("tipo", tipo),
       Query.orderAsc("nome"),
-    ]);
+      Query.limit(limit),
+      Query.offset(offSet),
+    ];
+
+    if (search) query.push(Query.contains("nome", search));
+
+    const tipos = await databases.listDocuments<Tipos>(
+      DATABASE_ID,
+      TIPOS_ID,
+      query
+    );
 
     return c.json({ data: tipos });
   })
@@ -35,16 +52,18 @@ const app = new Hono()
   .post(
     "/",
     sessionMiddleware,
+    planMiddleware,
     zValidator("json", createTiposSchema),
     async (c) => {
+      const user = c.get("user");
       const databases = c.get("databases");
-      const data = c.req.valid("json");
+      const values = c.req.valid("json");
 
       const tipo = await databases.createDocument(
         DATABASE_ID,
         TIPOS_ID,
         ID.unique(),
-        data
+        { ...values, user_id: user.$id }
       );
 
       return c.json({ data: tipo });

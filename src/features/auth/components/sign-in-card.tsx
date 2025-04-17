@@ -26,7 +26,6 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
 import { useLogin } from "../api/use-login";
 import { useState } from "react";
 import { signUpWithGoogle } from "@/lib/oauth";
@@ -81,7 +80,6 @@ export const SignInCard = () => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Insira seu e-mail"
@@ -99,7 +97,6 @@ export const SignInCard = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Insira sua senha"

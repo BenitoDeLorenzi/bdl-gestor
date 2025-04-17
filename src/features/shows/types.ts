@@ -18,7 +18,8 @@ export type Shows = Models.Document & {
   equipe: string[] | Equipe[];
   data: string;
   horario: string;
-  anotacoes: string;
+  anotacoes?: string;
+  google_event_id?: string;
 };
 
 export type Show = Models.Document & {
@@ -30,5 +31,6 @@ export type Show = Models.Document & {
   equipe: string[];
   data: string;
   horario: string;
-  anotacoes: string;
+  anotacoes?: string;
+  google_event_id?: string;
 };

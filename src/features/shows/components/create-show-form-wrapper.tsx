@@ -14,11 +14,17 @@ export const CreateShowFormWrapper = ({
   onCancel,
 }: CreateShowFormWrapperProps) => {
   const { data: contratantes, isLoading: isLoadingContratantes } =
-    useGetContratantes();
+    useGetContratantes({ page: 1, totalItems: 1000 });
 
-  const { data: equipe, isLoading: isLoadingEquipe } = useGetEquipe();
+  const { data: equipe, isLoading: isLoadingEquipe } = useGetEquipe({
+    page: 1,
+    totalItems: 1000,
+  });
 
-  const { data: locais, isLoading: isLoadingLocais } = useGetLocais();
+  const { data: locais, isLoading: isLoadingLocais } = useGetLocais({
+    page: 1,
+    totalItems: 1000,
+  });
 
   const contratantesOptions = contratantes?.documents.map((contratante) => ({
     nome: contratante.nome,
@@ -36,7 +42,7 @@ export const CreateShowFormWrapper = ({
   }));
 
   const { data: projetosOptions, isLoading: isLoadingProjetoOptions } =
-    useGetTipos({ tipo: "projetos" });
+    useGetTipos({ tipo: "projetos", page: 1, totalItems: 1000 });
 
   const isLoading =
     isLoadingContratantes ||
@@ -48,7 +54,7 @@ export const CreateShowFormWrapper = ({
     return (
       <Card className="w-full h-[714px] border-none shadow-none">
         <CardContent className="flex items-center justify-center h-full">
-          <Loader className="size-5 animate-spin text-muted-foreground" />
+          <Loader className="size-7 animate-spin text-muted-foreground" />
         </CardContent>
       </Card>
     );

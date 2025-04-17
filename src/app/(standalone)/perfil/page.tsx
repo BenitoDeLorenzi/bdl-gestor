@@ -10,13 +10,13 @@ import { PerfilSessoesView } from "@/features/perfil/components/perfil-sessoes-v
 
 const PerfilPage = async () => {
   const user = await getCurrent();
-  if (!user) redirect("/sign-in");
+  if (!user) redirect("/");
 
   return (
     <div className="w-full lg:max-w-4xl">
       <Tabs defaultValue="perfil">
         <Card className="p-2 flex justify-between items-center">
-          <Link href="/" className="flex gap-2">
+          <Link href="/dashboard" className="flex gap-2">
             <ChevronLeft />
             <span>Voltar</span>
           </Link>

@@ -1,19 +1,26 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQueryState } from "nuqs";
-import { useGetProjeto } from "../api/use-get-projeto";
-import DottedSeparator from "@/components/dotted-separator";
-import { HandCoins, Loader, Mail, PlusIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useCreateProjetosFinanceModal } from "../hooks/use-create-projetos-finance-modal";
-import { useGetProjetosFinance } from "../api/use-get-projetos-finance";
-import { ProjetosFinanceDataTable } from "./projetos-finance-data-table";
-import { projetosFinanceColumns } from "./projetos-finance-columns";
+import { useCreateProjetosCategoriasModal } from "../hooks/use-create-projetos-categorias-modal";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import { Button } from "@/components/ui/button";
+import DottedSeparator from "@/components/dotted-separator";
+
+import { ArrowUpDown, HandCoins, ListTree, Mail, PlusIcon } from "lucide-react";
+
+import { ProjetosFinanceView } from "./projetos-finance-view";
+import { ProjetosMessagesView } from "./projetos-messages-view";
+import { cn } from "@/lib/utils";
 import { ProjetosFinanceAnalytics } from "./projetos-finance-analytics";
-import { useGetProjetosMessages } from "../api/use-get-projetos-messages";
-import { ProjetosMessagesDataTable } from "./projetos-messages-data-table";
-import { projetosMessagesColumns } from "./projetos-messages-columns";
 
 interface ProjetosViewSwitcherProps {
   projetoId: string;
@@ -22,26 +29,12 @@ interface ProjetosViewSwitcherProps {
 export const ProjetosViewSwitcher = ({
   projetoId,
 }: ProjetosViewSwitcherProps) => {
-  const { open } = useCreateProjetosFinanceModal();
-
-  const { data: projeto, isLoading: isLoadingProjeto } = useGetProjeto({
-    projetoId: projetoId,
-  });
-
-  const { data: projetoFinance, isLoading: isLoadingProjetoFinance } =
-    useGetProjetosFinance({ projetoId: projetoId });
-
-  const { data: projetoMessages, isLoading: isLoadingProjetoMessages } =
-    useGetProjetosMessages({ projetoNome: projeto?.nome || "" });
+  const { open: openMovimento } = useCreateProjetosFinanceModal();
+  const { open: openCategorias } = useCreateProjetosCategoriasModal();
 
   const [view, setView] = useQueryState("projeto-view", {
     defaultValue: "finance",
   });
-
-  const isLoading =
-    isLoadingProjeto || isLoadingProjetoFinance || isLoadingProjetoMessages;
-
-  console.log(projetoFinance);
 
   return (
     <Tabs
@@ -50,8 +43,6 @@ export const ProjetosViewSwitcher = ({
       onValueChange={setView}
     >
       <div className="h-full flex flex-col overflow-auto p-4">
-        <h1 className="text-xl font-semibold">{projeto?.nome}</h1>
-        <DottedSeparator className="my-4" />
         <div className="flex flex-col gap-y-2 lg:flex-row justify-between items-center">
           <TabsList className="w-full lg:w-auto">
             <TabsTrigger className="h-8 w-full lg:w-auto" value="finance">
@@ -68,38 +59,46 @@ export const ProjetosViewSwitcher = ({
             </TabsTrigger>
           </TabsList>
           {view === "finance" && (
-            <Button
-              size="sm"
-              className="w-full lg:w-auto"
-              onClick={() => open(projetoId)}
-            >
-              <PlusIcon className="size-4 mr-2" />
-              Novo
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" className="w-full lg:w-auto">
+                  <PlusIcon className="size-4 mr-2" />
+                  Novo
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => openMovimento(projetoId)}>
+                  <ArrowUpDown />
+                  Movimento
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openCategorias(projetoId)}>
+                  <ListTree />
+                  Categorias
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
         <DottedSeparator className="py-2" />
-        {isLoading ? (
-          <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
-            <Loader className="size-5 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <>
-            <TabsContent value="finance">
-              <ProjetosFinanceAnalytics projetoId={projetoId} />
-              <ProjetosFinanceDataTable
-                columns={projetosFinanceColumns}
-                data={projetoFinance?.documents || []}
-              />
-            </TabsContent>
-            <TabsContent value="message" className="mt-0">
-              <ProjetosMessagesDataTable
-                columns={projetosMessagesColumns}
-                data={projetoMessages?.documents || []}
-              />
-            </TabsContent>
-          </>
-        )}
+        <TabsContent
+          value="finance"
+          className={cn(
+            view === "finance" ? "flex flex-col h-full" : "",
+            "mt-0"
+          )}
+        >
+          <ProjetosFinanceAnalytics projetoId={projetoId} />
+          <ProjetosFinanceView projetoId={projetoId} />
+        </TabsContent>
+        <TabsContent
+          value="message"
+          className={cn(
+            view === "message" ? "flex flex-col h-full" : "",
+            "mt-0"
+          )}
+        >
+          <ProjetosMessagesView projetoId={projetoId} />
+        </TabsContent>
       </div>
     </Tabs>
   );

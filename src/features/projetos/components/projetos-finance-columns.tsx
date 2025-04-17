@@ -10,8 +10,7 @@ import {
   ProjetosFinanceFormaPagamento,
 } from "../types";
 
-import { format, formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ProjetosFinanceActions } from "./projetos-finance-actions";
@@ -31,6 +30,10 @@ export const projetosFinanceColumns: ColumnDef<ProjetosFinance>[] = [
         </div>
       );
     },
+  },
+  {
+    accessorKey: "categoria",
+    header: "Categoria",
   },
   {
     accessorKey: "forma_pagamento",

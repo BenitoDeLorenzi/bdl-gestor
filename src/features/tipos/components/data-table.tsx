@@ -28,7 +28,6 @@ import {
 import { PlusIcon, TriangleAlert } from "lucide-react";
 import DottedSeparator from "@/components/dotted-separator";
 import { Input } from "@/components/ui/input";
-import { useCreateTiposModal } from "../hooks/use-create-tipos-modal";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -61,27 +60,8 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const { open } = useCreateTiposModal();
-
   return (
     <div className="">
-      <div className="flex flex-col gap-y-2 lg:flex-row justify-between items-center">
-        <div className="flex w-full items-center gap-x-2">
-          <Input
-            placeholder={`Buscar ${tipo}`}
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("nome")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-        </div>
-        <Button size="sm" className="w-full lg:w-auto" onClick={open}>
-          <PlusIcon className="size-4 mr-2" />
-          Novo
-        </Button>
-      </div>
-      <DottedSeparator className="my-4" />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -134,24 +114,6 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Anterior
-        </Button>
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Próximo
-        </Button>
       </div>
     </div>
   );

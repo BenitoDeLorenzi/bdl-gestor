@@ -42,7 +42,7 @@ export const ShowsActions = ({ id, children, status }: ShowsActionsProps) => {
   };
 
   const onOpenShow = () => {
-    router.push(`/shows/${id}`);
+    router.push(`/dashboard/shows/${id}`);
   };
 
   return (

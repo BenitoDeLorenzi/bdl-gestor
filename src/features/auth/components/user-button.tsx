@@ -10,7 +10,7 @@ import {
 
 import { useLogout } from "../api/use-logout";
 import { useCurrent } from "../api/use-current";
-import { CircleUser, Loader2, LogOut } from "lucide-react";
+import { CircleUser, Loader2, LogOut, ReceiptText } from "lucide-react";
 import DottedSeparator from "@/components/dotted-separator";
 import Link from "next/link";
 
@@ -74,6 +74,15 @@ export const UserButton = () => {
           <Link href="/perfil">
             <CircleUser className="size-4 mr-2" />
             Perfil
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="h-10 flex items-center justify-center font-medium cursor-pointer"
+          asChild
+        >
+          <Link href="/planos">
+            <ReceiptText className="size-4 mr-2" />
+            Planos
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem

@@ -1,24 +1,16 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { createAdminClient } from "@/lib/appwrite";
-import { loginSchema, registerSchema } from "../schemas";
-import { ID } from "node-appwrite";
-import { deleteCookie, setCookie } from "hono/cookie";
-import { AUTH_COOKIE } from "../constants";
-import { sessionMiddleware } from "@/lib/session-middleware";
-import { title } from "process";
+import { ID, AppwriteException } from "node-appwrite";
+import { setCookie, deleteCookie } from "hono/cookie";
 
-interface AppwriteError {
-  name: string;
-  code: number;
-  type: string;
-  response: {
-    message: string;
-    code: number;
-    type: string;
-    version: string;
-  };
-}
+import { loginSchema, registerSchema } from "../schemas";
+
+import { AUTH_COOKIE } from "../constants";
+
+import { createAdminClient } from "@/lib/appwrite";
+import { sessionMiddleware } from "@/lib/session-middleware";
+import { stripe } from "@/lib/stripe";
+import { STRIPE_TRIAL_PRICE_ID } from "@/config";
 
 const app = new Hono()
   .get("/current", sessionMiddleware, (c) => {
@@ -28,8 +20,7 @@ const app = new Hono()
   .post("/login", zValidator("json", loginSchema), async (c) => {
     try {
       const { email, password } = await c.req.valid("json");
-
-      const { account, users } = await createAdminClient();
+      const { account } = await createAdminClient();
 
       const session = await account.createEmailPasswordSession(email, password);
 
@@ -46,7 +37,7 @@ const app = new Hono()
         error: null,
       });
     } catch (error) {
-      const typedError = error as AppwriteError;
+      const typedError = error as AppwriteException;
       return c.json({
         success: false,
         error: typedError,
@@ -56,12 +47,28 @@ const app = new Hono()
   .post("/register", zValidator("json", registerSchema), async (c) => {
     try {
       const { email, name, password } = c.req.valid("json");
+      const { account, users } = await createAdminClient();
 
-      const { account } = await createAdminClient();
-
-      await account.create(ID.unique(), email, password, name);
-
+      const user = await account.create(ID.unique(), email, password, name);
       const session = await account.createEmailPasswordSession(email, password);
+      const stripeCustomer = await stripe.customers.create({
+        email,
+        name,
+        metadata: {
+          appwrite_user_id: user.$id,
+        },
+      });
+
+      await stripe.subscriptions.create({
+        customer: stripeCustomer.id,
+        items: [{ price: STRIPE_TRIAL_PRICE_ID }],
+        trial_period_days: 7,
+        payment_behavior: "default_incomplete",
+      });
+
+      await users.updatePrefs(user.$id, {
+        stripeCustomerId: stripeCustomer.id,
+      });
 
       setCookie(c, AUTH_COOKIE, session.secret, {
         path: "/",
@@ -71,10 +78,11 @@ const app = new Hono()
         maxAge: 60 * 60 * 24 * 30,
       });
 
-      return c.json({ success: true, error: null });
+      return c.json({ user: user, error: null });
     } catch (error) {
-      const typedError = error as AppwriteError;
-      return c.json({ success: false, error: typedError });
+      console.log(error);
+      const typedError = error as AppwriteException;
+      return c.json({ user: null, error: typedError });
     }
   })
   .post("/logout", sessionMiddleware, async (c) => {

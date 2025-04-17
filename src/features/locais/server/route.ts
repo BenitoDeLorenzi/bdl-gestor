@@ -6,19 +6,50 @@ import { DATABASE_ID, LOCAIS_ID, SHOWS_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { createLocaisSchema } from "../schemas";
 import { Locais } from "../types";
+import { z } from "zod";
+import { getCurrent } from "@/features/auth/queries";
+import { planMiddleware } from "@/lib/plan-middleware";
 
 const app = new Hono()
-  .get("/", sessionMiddleware, async (c) => {
-    const databases = c.get("databases");
+  .get(
+    "/",
+    sessionMiddleware,
+    zValidator(
+      "query",
+      z.object({
+        page: z.string(),
+        totalItems: z.string(),
+        tipo: z.string().nullish(),
+        search: z.string().nullish(),
+      })
+    ),
+    async (c) => {
+      const user = await getCurrent();
+      const databases = c.get("databases");
+      const { page, totalItems, tipo, search } = c.req.valid("query");
 
-    const locais = await databases.listDocuments<Locais>(
-      DATABASE_ID,
-      LOCAIS_ID,
-      [Query.orderAsc("nome")]
-    );
+      const offSet = (parseInt(page) - 1) * parseInt(totalItems);
+      const limit = parseInt(totalItems);
 
-    return c.json({ data: locais });
-  })
+      const query = [
+        Query.orderAsc("nome"),
+        Query.limit(limit),
+        Query.offset(offSet),
+        Query.equal("user_id", user?.$id || ""),
+      ];
+
+      if (tipo) query.push(Query.equal("tipo", tipo));
+      if (search) query.push(Query.contains("nome", search));
+
+      const locais = await databases.listDocuments<Locais>(
+        DATABASE_ID,
+        LOCAIS_ID,
+        query
+      );
+
+      return c.json({ data: locais });
+    }
+  )
   .get("/:localId", sessionMiddleware, async (c) => {
     const { localId } = c.req.param();
     const databases = c.get("databases");
@@ -35,15 +66,17 @@ const app = new Hono()
     "/",
     zValidator("json", createLocaisSchema),
     sessionMiddleware,
+    planMiddleware,
     async (c) => {
+      const user = await getCurrent();
       const databases = c.get("databases");
-      const data = c.req.valid("json");
+      const values = c.req.valid("json");
 
       const locais = await databases.createDocument(
         DATABASE_ID,
         LOCAIS_ID,
         ID.unique(),
-        data
+        { ...values, user_id: user?.$id }
       );
 
       return c.json({ data: locais });

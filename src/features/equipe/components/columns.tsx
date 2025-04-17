@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, User } from "lucide-react";
 
 import { mask } from "remask";
 
@@ -11,11 +11,24 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Equipe } from "../types";
 import { EquipeActions } from "./equipe-actions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const columns: ColumnDef<Equipe>[] = [
   {
     accessorKey: "nome",
     header: "Nome",
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center gap-2">
+          <Avatar>
+            <AvatarFallback>
+              <User />
+            </AvatarFallback>
+          </Avatar>
+          <span>{row.original.nome}</span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "funcao",

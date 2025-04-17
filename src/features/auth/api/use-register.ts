@@ -18,8 +18,8 @@ export const useRegister = () => {
       const response = await client.api.auth.register["$post"]({ json });
       return await response.json();
     },
-    onSuccess: (data) => {
-      if (data.success) {
+    onSuccess: async (data) => {
+      if (data.user) {
         toast.success("Usuário criado com sucesso!");
         queryClient.invalidateQueries({ queryKey: ["current"] });
         router.refresh();

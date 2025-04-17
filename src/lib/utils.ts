@@ -22,3 +22,10 @@ export const getInitials = (fullName: string): string => {
 
   return `${firstInitial}${lastInitial}`;
 };
+
+export const formatCurrency = (value: number) => {
+  return Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+};

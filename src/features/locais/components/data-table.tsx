@@ -4,7 +4,6 @@ import * as React from "react";
 
 import {
   ColumnDef,
-  ColumnFiltersState,
   SortingState,
   flexRender,
   getCoreRowModel,
@@ -25,19 +24,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import { ListCheckIcon, Plus, TriangleAlert } from "lucide-react";
+import { Plus, TriangleAlert } from "lucide-react";
 import DottedSeparator from "@/components/dotted-separator";
-import { useCreateLocaisModal } from "../hooks/use-create-locais-modal";
-import { Locais } from "../types";
-import { Input } from "@/components/ui/input";
+
 import { useSidebar } from "@/components/ui/sidebar";
 
 interface DataTableProps<TData, TValue> {
@@ -51,9 +40,6 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const { isMobile } = useSidebar();
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
 
   const table = useReactTable({
     data,
@@ -62,11 +48,9 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
-      columnFilters,
       columnVisibility: {
         tipo: isMobile ? false : true,
         $createdAt: isMobile ? false : true,
@@ -74,61 +58,8 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const { open } = useCreateLocaisModal();
-
-  const locais = data as Locais[];
-
   return (
     <div className="">
-      <div className="flex flex-col gap-y-2 lg:flex-row justify-between items-center">
-        <div className="flex flex-col lg:flex-row w-full lg:w-auto gap-2">
-          <Input
-            placeholder="Buscar local..."
-            value={(table.getColumn("nome")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("nome")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm h-8"
-          />
-          <Select
-            onValueChange={(value) => {
-              if (value === "all") {
-                table.getColumn("tipo")?.setFilterValue([]);
-              } else {
-                table.getColumn("tipo")?.setFilterValue(value);
-              }
-            }}
-          >
-            <SelectTrigger className="w-full lg:w-auto h-8">
-              <div className="flex items-center pr-2">
-                <ListCheckIcon className="size-4 mr-2" />
-                <SelectValue placeholder="Todos tipos" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos tipos</SelectItem>
-              {Array.from(
-                new Map(locais.map((item) => [item.tipo, item])).values()
-              ).map((item) => (
-                <SelectItem key={item.tipo} value={item.tipo}>
-                  {item.tipo}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button
-          size="sm"
-          className="w-full lg:w-auto"
-          onClick={open}
-          effect="expandIcon"
-          icon={Plus}
-          iconPlacement="right"
-        >
-          Novo
-        </Button>
-      </div>
-      <DottedSeparator className="my-4" />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -181,24 +112,6 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Anterior
-        </Button>
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Próximo
-        </Button>
       </div>
     </div>
   );

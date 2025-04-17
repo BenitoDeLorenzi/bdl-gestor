@@ -20,11 +20,15 @@ export const EditEquipeFormWrapper = ({
 
   const { data: funcoesOpt, isLoading: isLoadingFuncoesOpt } = useGetTipos({
     tipo: "funcoes",
+    page: 1,
+    totalItems: 1000,
   });
 
   const { data: instrumentosOpt, isLoading: isLoadingInstrumentosOpt } =
     useGetTipos({
       tipo: "instrumentos",
+      page: 1,
+      totalItems: 1000,
     });
 
   const isLoading =
@@ -34,7 +38,7 @@ export const EditEquipeFormWrapper = ({
     return (
       <Card className="w-full h-[714px] border-none shadow-none">
         <CardContent className="flex items-center justify-center h-full">
-          <Loader className="size-5 animate-spin text-muted-foreground" />
+          <Loader className="size-7 animate-spin text-muted-foreground" />
         </CardContent>
       </Card>
     );

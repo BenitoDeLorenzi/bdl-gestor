@@ -22,6 +22,8 @@ export const EditLocalFormWrapper = ({
   const { data: ufs, isLoading: isLoadingUfs } = useGetUfs();
   const { data: locaisOpt, isLoading: isLoadingLocaisOpt } = useGetTipos({
     tipo: "locais",
+    page: 1,
+    totalItems: 1000,
   });
 
   const isLoading =
@@ -31,7 +33,7 @@ export const EditLocalFormWrapper = ({
     return (
       <Card className="w-full h-[714px] border-none shadow-none">
         <CardContent className="flex items-center justify-center h-full">
-          <Loader className="size-5 animate-spin text-muted-foreground" />
+          <Loader className="size-7 animate-spin text-muted-foreground" />
         </CardContent>
       </Card>
     );

@@ -15,10 +15,10 @@ export const useLogin = () => {
   const mutation = useMutation<ResponseType, Error, RequestType>({
     mutationFn: async ({ json }) => {
       const response = await client.api.auth.login["$post"]({ json });
-
       return await response.json();
     },
     onSuccess: (data) => {
+      console.log(data);
       if (data.success) {
         toast.success("Conectado");
         queryClient.invalidateQueries({ queryKey: ["current"] });

@@ -3,10 +3,7 @@ import { z } from "zod";
 
 export const createContratantesSchema = z.object({
   nome: z.string().nonempty("O nome é obrigatório."),
-  telefone: z
-    .string()
-    .nonempty("O telefone é obrigatório.")
-    .transform((val) => unmask(val)),
+  telefone: z.string().optional(),
   email: z
     .string()
     .optional()

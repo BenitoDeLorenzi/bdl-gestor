@@ -14,8 +14,6 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 
-import { Button } from "@/components/ui/button";
-
 import {
   Table,
   TableBody,
@@ -119,24 +117,6 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Anterior
-        </Button>
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Próximo
-        </Button>
       </div>
     </div>
   );

@@ -33,6 +33,8 @@ import { useCreateLocais } from "../api/use-create-locais";
 import { useEffect } from "react";
 import { useGetCep } from "../hooks/use-get-cep";
 import { Tipos } from "@/features/tipos/types";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface CreateLocaisFormProps {
   onCancel: () => void;
@@ -45,6 +47,7 @@ export const CreateLocaisForm = ({
   ufs,
   locaisOpt,
 }: CreateLocaisFormProps) => {
+  const router = useRouter();
   const { mutate, isPending } = useCreateLocais();
 
   const form = useForm<z.infer<typeof createLocaisSchema>>({
@@ -62,12 +65,30 @@ export const CreateLocaisForm = ({
   });
 
   const onSubmit = (values: z.infer<typeof createLocaisSchema>) => {
-    console.log(values);
     mutate(
       { json: values },
       {
         onSuccess: () => {
           form.reset();
+        },
+        onError: (error) => {
+          if (
+            error.message.includes("plano") ||
+            error.message.includes("Plano")
+          ) {
+            onCancel?.();
+            toast.warning(error.message, {
+              duration: Infinity,
+              action: {
+                label: "Planos",
+                onClick: () => {
+                  router.push("/planos");
+                },
+              },
+            });
+          } else {
+            toast.error(error.message);
+          }
         },
       }
     );
@@ -137,7 +158,7 @@ export const CreateLocaisForm = ({
                       </FormControl>
                       <SelectContent>
                         {locaisOpt.map((locais: Tipos) => (
-                          <SelectItem value={locais.nome}>
+                          <SelectItem key={locais.$id} value={locais.nome}>
                             {locais.nome}
                           </SelectItem>
                         ))}

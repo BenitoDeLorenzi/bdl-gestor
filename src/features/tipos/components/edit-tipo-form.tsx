@@ -18,7 +18,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useCreateTipos } from "../api/use-create-tipos";
 import { Tipos } from "../types";
 import { useUpdateTipo } from "../api/use-update-tipo";
 
@@ -28,10 +27,10 @@ interface EditTipoFormProps {
 }
 
 const title: Record<string, string> = {
-  locais: "Criar novo tipo de local",
-  funcoes: "Criar novo tipo de função",
-  instrumentos: "Criar novo tipo de instrumento",
-  projetos: "Criar novo tipo de projeto",
+  locais: "Editar tipo de local",
+  funcoes: "Editar tipo de função",
+  instrumentos: "Editar tipo de instrumento",
+  projetos: "Editar tipo de projeto",
 };
 
 export const EditTipoForm = ({

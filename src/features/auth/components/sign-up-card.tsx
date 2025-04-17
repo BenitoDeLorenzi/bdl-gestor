@@ -20,17 +20,14 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRegister } from "../api/use-register";
-import { useState } from "react";
 
 const SignUpCard = () => {
-  const [error, setError] = useState("");
   const { mutate, isPending } = useRegister();
 
   const form = useForm<z.infer<typeof registerSchema>>({
@@ -43,8 +40,7 @@ const SignUpCard = () => {
       { json: values },
       {
         onSuccess: (data) => {
-          if (!data.success) {
-            console.log(data.error);
+          if (!data.user) {
             const code = data.error?.code;
 
             if (code === 400) {
@@ -154,20 +150,7 @@ const SignUpCard = () => {
       <div className="px-7">
         <DottedSeparator />
       </div>
-      <CardContent className="p-7 flex flex-col gap-y-4">
-        <Button
-          variant="outline"
-          size="lg"
-          disabled={isPending}
-          effect="ringHover"
-        >
-          <FcGoogle className="mr-2 size-5" />
-          Entrar com Google
-        </Button>
-      </CardContent>
-      <div className="px-7">
-        <DottedSeparator />
-      </div>
+
       <CardContent className="p-7 flex items-center justify-center">
         <p>
           Já tem uma conta?{" "}

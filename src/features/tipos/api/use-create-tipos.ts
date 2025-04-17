@@ -17,19 +17,15 @@ export const useCreateTipos = () => {
       const response = await client.api.tipos["$post"]({ json });
 
       if (!response.ok) {
-        console.log(response);
-        throw new Error("Erro ao criar tipo.");
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data?.error ?? "Erro ao criar tipo.");
       }
-
       return await response.json();
     },
-    onSuccess: ({ data }) => {
+    onSuccess: () => {
       toast.success("Tipo criado com sucesso!");
-      router.refresh();
       queryClient.invalidateQueries({ queryKey: ["tipos"] });
-    },
-    onError: (error) => {
-      toast.error(error.message);
+      router.refresh();
     },
   });
 

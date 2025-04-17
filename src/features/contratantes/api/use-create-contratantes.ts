@@ -19,8 +19,8 @@ export const useCreateContratantes = () => {
       const response = await client.api.contratantes["$post"]({ json });
 
       if (!response.ok) {
-        console.log(response);
-        throw new Error("Erro ao criar contratante.");
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data?.error ?? "Erro ao criar contratante.");
       }
 
       return await response.json();
@@ -28,10 +28,7 @@ export const useCreateContratantes = () => {
     onSuccess: () => {
       toast.success("Contratante criado com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["contratantes"] });
-      router.push("/contratantes");
-    },
-    onError: (error) => {
-      toast.error(error.message);
+      router.refresh();
     },
   });
 

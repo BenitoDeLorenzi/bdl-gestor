@@ -22,10 +22,10 @@ import {
   Briefcase,
   ChevronRight,
   CirclePlus,
+  HandCoins,
   Home,
   MapPin,
   Music,
-  ScrollText,
   SquareTerminal,
   Trash,
   Users,
@@ -45,31 +45,33 @@ import { useGetProjetos } from "@/features/projetos/api/use-get-projetos";
 import { useDeleteProjetos } from "@/features/projetos/api/use-delete-projetos";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useEffect } from "react";
+import { Card, CardContent } from "./ui/card";
+import { SidebarFooterCard } from "./sidebar-footer-card";
 
 const navMain = [
   {
     label: "Shows",
-    href: "/shows",
+    href: "/dashboard/shows",
     icon: Music,
   },
   {
     label: "Faturamento",
-    href: "/faturamento",
-    icon: ScrollText,
+    href: "/dashboard/faturamento",
+    icon: HandCoins,
   },
   {
     label: "Equipe",
-    href: "/equipe",
+    href: "/dashboard/equipe",
     icon: Users,
   },
   {
     label: "Contratantes",
-    href: "/contratantes",
+    href: "/dashboard/contratantes",
     icon: Briefcase,
   },
   {
     label: "Locais",
-    href: "/locais",
+    href: "/dashboard/locais",
     icon: MapPin,
   },
 ];
@@ -82,27 +84,21 @@ const navConfig = [
     items: [
       {
         title: "Locais",
-        href: "/tipos/locais",
+        href: "/dashboard/tipos/locais",
       },
       {
         title: "Funções",
-        href: "/tipos/funcoes",
+        href: "/dashboard/tipos/funcoes",
       },
       {
         title: "Instrumentos",
-        href: "/tipos/instrumentos",
+        href: "/dashboard/tipos/instrumentos",
       },
       {
         title: "Projetos",
-        href: "/tipos/projetos",
+        href: "/dashboard/tipos/projetos",
       },
     ],
-  },
-  {
-    title: "Usuários",
-    href: "/usuarios",
-    icon: Users,
-    items: [],
   },
 ];
 
@@ -145,7 +141,7 @@ export function AppSidebar() {
       <Sidebar>
         <SidebarHeader>
           <div className="flex w-full justify-center items-center">
-            <Link href="/">
+            <Link href="/dashboard">
               <Image
                 src="/bdl-logo.svg"
                 alt="logo"
@@ -163,8 +159,11 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu className="mb-2">
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={pathname === "/"}>
-                    <Link href="/">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === "/dashboard"}
+                  >
+                    <Link href="/dashboard">
                       <Home />
                       <span>Home</span>
                     </Link>
@@ -220,15 +219,15 @@ export function AppSidebar() {
             <SidebarGroupLabel>Configurações</SidebarGroupLabel>
             <SidebarMenu>
               {navConfig.map((item) => {
-                const isGroupActive = pathname.startsWith(item.href);
-
                 if (item.items.length > 0) {
+                  const isActive = pathname.split("/")[2] === item.href;
+
                   return (
                     <Collapsible
                       key={item.title}
                       asChild
                       className="group/collapsible"
-                      defaultOpen={true}
+                      defaultOpen={isActive}
                     >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
@@ -286,7 +285,9 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter />
+        <SidebarFooter>
+          <SidebarFooterCard />
+        </SidebarFooter>
       </Sidebar>
     </>
   );

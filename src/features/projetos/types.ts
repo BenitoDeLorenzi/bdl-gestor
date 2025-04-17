@@ -46,6 +46,7 @@ export type ProjetosFinance = Models.Document & {
   status: ProjetosFinanceStatus;
   user_id: string;
   obecervacoes: string;
+  categoria: string;
 };
 
 export type ProjetosMessages = Models.Document & {
@@ -63,4 +64,9 @@ export type ProjetosMessages = Models.Document & {
   termos: boolean;
   email: string;
   projeto: string;
+};
+
+export type ProjetosCategorias = Models.Document & {
+  projeto_id: string;
+  nome: string;
 };

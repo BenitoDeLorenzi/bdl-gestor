@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useCreateTipos } from "../api/use-create-tipos";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface CreateTiposFormProps {
   onCancel: () => void;
@@ -33,6 +35,7 @@ const title: Record<string, string> = {
 };
 
 export const CreateTiposForm = ({ onCancel, tipo }: CreateTiposFormProps) => {
+  const router = useRouter();
   const { mutate, isPending } = useCreateTipos();
   const form = useForm({
     resolver: zodResolver<z.infer<typeof createTiposSchema>>(createTiposSchema),
@@ -48,7 +51,26 @@ export const CreateTiposForm = ({ onCancel, tipo }: CreateTiposFormProps) => {
       {
         onSuccess: () => {
           form.reset();
-          onCancel();
+          onCancel?.();
+        },
+        onError: (error) => {
+          if (
+            error.message.includes("plano") ||
+            error.message.includes("Plano")
+          ) {
+            onCancel?.();
+            toast.warning(error.message, {
+              duration: Infinity,
+              action: {
+                label: "Planos",
+                onClick: () => {
+                  router.push("/planos");
+                },
+              },
+            });
+          } else {
+            toast.error(error.message);
+          }
         },
       }
     );

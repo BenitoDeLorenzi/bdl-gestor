@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { createFaturamentoSchema, createShowsSchema } from "../schemas";
 import { zValidator } from "@hono/zod-validator";
 import { sessionMiddleware } from "@/lib/session-middleware";
+import axios from "axios";
 
 import { ID, Query } from "node-appwrite";
 import {
@@ -14,11 +15,15 @@ import {
   SHOWS_ID,
 } from "@/config";
 
-import { Shows, ShowStatus } from "../types";
+import { Show, Shows, ShowStatus } from "../types";
 import { Equipe } from "@/features/equipe/types";
 import { Contratante } from "@/features/contratantes/types";
 import { Locais } from "@/features/locais/types";
-import { endOfMonth, startOfMonth, subMonths } from "date-fns";
+import { addDays, endOfMonth, format, startOfMonth, subMonths } from "date-fns";
+import { getCurrent } from "@/features/auth/queries";
+import { getValidGoogleAccessToken } from "@/lib/getValidGoogleAccessToken";
+import { formatCurrency } from "@/lib/utils";
+import { planMiddleware } from "@/lib/plan-middleware";
 
 interface ShowAnalytics {
   pendenteShowsCount: number;
@@ -39,23 +44,48 @@ const app = new Hono()
         contratanteId: z.string(),
         status: z.nativeEnum(ShowStatus).nullish(),
         search: z.string().nullish(),
-        data: z.string().nullish(),
+        ano: z.string().nullish(),
         local: z.string().nullish(),
         projeto: z.string().nullish(),
+        page: z.string(),
+        totalItems: z.string(),
       })
     ),
     async (c) => {
+      const user = await getCurrent();
       const databases = c.get("databases");
-      const { status, contratanteId, search, data, local, projeto } =
-        c.req.valid("query");
+      const {
+        status,
+        contratanteId,
+        search,
+        ano,
+        local,
+        projeto,
+        page,
+        totalItems,
+      } = c.req.valid("query");
 
-      console.log(projeto);
+      const offSet = (parseInt(page) - 1) * parseInt(totalItems);
+      const limit = parseInt(totalItems);
 
-      const query = [Query.orderDesc("data")];
+      const startDate = new Date(parseInt(ano || ""), 0, 1);
+      const endDate = new Date(parseInt(ano || ""), 11, 31);
+
+      const query = [
+        Query.orderDesc("data"),
+        Query.orderDesc("horario"),
+        Query.limit(limit),
+        Query.offset(offSet),
+        Query.equal("user_id", user?.$id || ""),
+      ];
 
       if (contratanteId) query.push(Query.equal("contratante", contratanteId));
       if (local) query.push(Query.equal("local", local));
-      if (data) query.push(Query.equal("data", data));
+      if (ano)
+        query.push(
+          Query.greaterThanEqual("data", startDate.toDateString()),
+          Query.lessThanEqual("data", endDate.toDateString())
+        );
       if (status) query.push(Query.equal("status", status));
       if (search) query.push(Query.search("nome", search));
       if (projeto) query.push(Query.equal("projeto", projeto));
@@ -91,21 +121,25 @@ const app = new Hono()
       const equipeDocs = await databases.listDocuments<Equipe>(
         DATABASE_ID,
         EQUIPE_ID,
-        equipeIds.length > 0 ? [Query.contains("$id", equipeIds)] : []
+        equipeIds.length > 0
+          ? [Query.contains("$id", equipeIds), Query.limit(10000)]
+          : []
       );
 
       const contratanteDocs = await databases.listDocuments<Contratante>(
         DATABASE_ID,
         CONTRATANTES_ID,
         contratantesIds.length > 0
-          ? [Query.contains("$id", contratantesIds)]
+          ? [Query.contains("$id", contratantesIds), Query.limit(10000)]
           : []
       );
 
       const locaisDocs = await databases.listDocuments<Locais>(
         DATABASE_ID,
         LOCAIS_ID,
-        locaisIds.length > 0 ? [Query.contains("$id", locaisIds)] : []
+        locaisIds.length > 0
+          ? [Query.contains("$id", locaisIds), Query.limit(10000)]
+          : []
       );
 
       const populatedShows: Shows[] = shows.documents.map((show) => {
@@ -189,8 +223,10 @@ const app = new Hono()
   .post(
     "/",
     sessionMiddleware,
+    planMiddleware,
     zValidator("json", createShowsSchema),
     async (c) => {
+      const user = c.get("user");
       const databases = c.get("databases");
       const values = c.req.valid("json");
 
@@ -198,8 +234,66 @@ const app = new Hono()
         DATABASE_ID,
         SHOWS_ID,
         ID.unique(),
-        values
+        { ...values, user_id: user?.$id }
       );
+
+      const accessToken = await getValidGoogleAccessToken(
+        user.$id,
+        user.prefs as {
+          googleAccessToken: string;
+          googleRefreshToken: string;
+          googleTokenExpiry: string;
+        }
+      );
+
+      if (accessToken) {
+        try {
+          const contratante = await databases.getDocument<Contratante>(
+            DATABASE_ID,
+            CONTRATANTES_ID,
+            values.contratante
+          );
+
+          const local = await databases.getDocument<Locais>(
+            DATABASE_ID,
+            LOCAIS_ID,
+            values.local
+          );
+
+          const startDate = format(values.data, "yyyy-MM-dd");
+          const endDate = format(addDays(values.data, 1), "yyyy-MM-dd");
+          const description = `Contratante: ${
+            contratante.nome
+          }<br>Valor: ${formatCurrency(values.valor)}<br>Projeto: ${
+            values.projeto
+          }<br>Horário: ${format(values.horario, "HH:mm")}`;
+
+          const response = await axios.post(
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+            {
+              summary: local.nome || "Show sem título",
+              description: description || "Evento criado via BDL Gestor",
+              start: { date: startDate },
+              end: { date: endDate },
+              colorId: "5", // 🔥 Ex: laranja
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const googleEvent = response.data;
+
+          await databases.updateDocument(DATABASE_ID, SHOWS_ID, show.$id, {
+            google_event_id: googleEvent.id,
+          });
+        } catch (error) {
+          console.error("Erro ao criar evento no Google Calendar:", error);
+        }
+      }
 
       return c.json({ data: show });
     }
@@ -225,7 +319,38 @@ const app = new Hono()
   )
   .delete("/:showId", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
+    const user = c.get("user");
     const { showId } = c.req.param();
+
+    const show = await databases.getDocument<Show>(
+      DATABASE_ID,
+      SHOWS_ID,
+      showId
+    );
+
+    if (show.google_event_id) {
+      try {
+        const accessToken = await getValidGoogleAccessToken(
+          user.$id,
+          user.prefs as {
+            googleAccessToken: string;
+            googleRefreshToken: string;
+            googleTokenExpiry: string;
+          }
+        );
+
+        await axios.delete(
+          `https://www.googleapis.com/calendar/v3/calendars/primary/events/${show.google_event_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+      } catch (err) {
+        console.error("Erro ao remover evento do Google Calendar:", err);
+      }
+    }
 
     await databases.deleteDocument(DATABASE_ID, SHOWS_ID, showId);
 
@@ -261,8 +386,10 @@ const app = new Hono()
   .post(
     "/faturamento",
     sessionMiddleware,
+    planMiddleware,
     zValidator("json", createFaturamentoSchema),
     async (c) => {
+      const user = await getCurrent();
       const databases = c.get("databases");
       const values = c.req.valid("json");
 
@@ -278,7 +405,12 @@ const app = new Hono()
         DATABASE_ID,
         FATURAMENTOS_ID,
         ID.unique(),
-        { ...values, despesa_musicos: despesa_musicos, despesas: despesas }
+        {
+          ...values,
+          despesa_musicos: despesa_musicos,
+          despesas: despesas,
+          user_id: user?.$id,
+        }
       );
 
       if (faturamento) {

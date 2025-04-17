@@ -14,8 +14,6 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 
-import { Button } from "@/components/ui/button";
-
 import {
   Table,
   TableBody,
@@ -52,7 +50,6 @@ export function ProjetosFinanceDataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    initialState: { pagination: { pageSize: 8 } },
     state: {
       sorting,
       columnFilters,
@@ -118,24 +115,6 @@ export function ProjetosFinanceDataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Anterior
-        </Button>
-        <Button
-          variant="secondary"
-          size="xs"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Próximo
-        </Button>
       </div>
     </div>
   );

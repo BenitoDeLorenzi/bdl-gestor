@@ -15,8 +15,8 @@ export const Navbar = () => {
   const pathname = usePathname();
 
   const pathSegments = pathname.split("/").filter(Boolean);
-  const title = pathSegments[0] || "home";
-  const subTitle = pathSegments[1] || "";
+  const title = pathSegments[1] || "home";
+  const subTitle = pathSegments[2] || "";
 
   return (
     <nav className="pt-4 px-6 flex items-center justify-between">

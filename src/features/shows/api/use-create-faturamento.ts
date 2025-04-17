@@ -22,9 +22,8 @@ export const useCreateFaturamento = () => {
       const response = await client.api.shows["faturamento"]["$post"]({ json });
 
       if (!response.ok) {
-        const error = await response.json();
-        console.log(error);
-        throw new Error("Erro ao criar faturamento.");
+        const data = (await response.json()) as { error?: string };
+        throw new Error(data?.error ?? "Erro ao criar faturamento.");
       }
 
       return await response.json();
@@ -36,9 +35,6 @@ export const useCreateFaturamento = () => {
       queryClient.invalidateQueries({ queryKey: ["shows-faturamento"] });
       queryClient.invalidateQueries({ queryKey: ["faturamentos"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
-    },
-    onError: (error) => {
-      toast.error(error.message);
     },
   });
 

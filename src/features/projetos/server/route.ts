@@ -1,5 +1,6 @@
 import {
   DATABASE_ID,
+  PROJETOS_CATEGORIAS_ID,
   PROJETOS_FINANCAS_ID,
   PROJETOS_ID,
   PROJETOS_MENSAGENS_ID,
@@ -9,8 +10,16 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { ID, Query } from "node-appwrite";
 import { z } from "zod";
-import { Projetos, ProjetosFinance, ProjetosMessages } from "../types";
-import { createProjetosFinanceSchema } from "../schemas";
+import {
+  Projetos,
+  ProjetosCategorias,
+  ProjetosFinance,
+  ProjetosMessages,
+} from "../types";
+import {
+  createProjetosCategoriasSchema,
+  createProjetosFinanceSchema,
+} from "../schemas";
 import { getCurrent } from "@/features/auth/queries";
 
 const app = new Hono()
@@ -36,22 +45,51 @@ const app = new Hono()
 
     return c.json({ data: projeto });
   })
-  .get("/finance/:projetoId", sessionMiddleware, async (c) => {
-    const databases = c.get("databases");
-    const { projetoId } = c.req.param();
+  .get(
+    "/finance/:projetoId",
+    sessionMiddleware,
+    zValidator(
+      "query",
+      z.object({
+        page: z.string(),
+        totalItems: z.string(),
+        status: z.string().nullish(),
+        categoria: z.string().nullish(),
+        forma_pagamento: z.string().nullish(),
+        tipo: z.string().nullish(),
+      })
+    ),
+    async (c) => {
+      const databases = c.get("databases");
+      const { projetoId } = c.req.param();
+      const { page, totalItems, categoria, forma_pagamento, status, tipo } =
+        c.req.valid("query");
 
-    const projetoFinance = await databases.listDocuments<ProjetosFinance>(
-      DATABASE_ID,
-      PROJETOS_FINANCAS_ID,
-      [
+      const offSet = (parseInt(page) - 1) * parseInt(totalItems);
+      const limit = parseInt(totalItems);
+
+      const query = [
         Query.equal("projeto_id", projetoId),
         Query.orderDesc("data"),
-        Query.limit(1000),
-      ]
-    );
+        Query.limit(limit),
+        Query.offset(offSet),
+      ];
 
-    return c.json({ data: projetoFinance });
-  })
+      if (tipo) query.push(Query.equal("tipo", tipo));
+      if (status) query.push(Query.equal("status", status));
+      if (categoria) query.push(Query.equal("categoria", categoria));
+      if (forma_pagamento)
+        query.push(Query.equal("forma_pagamento", forma_pagamento));
+
+      const projetoFinance = await databases.listDocuments<ProjetosFinance>(
+        DATABASE_ID,
+        PROJETOS_FINANCAS_ID,
+        query
+      );
+
+      return c.json({ data: projetoFinance });
+    }
+  )
   .get("/finance/movimentos/:financeId", sessionMiddleware, async (c) => {
     const databases = c.get("databases");
     const { financeId } = c.req.param();
@@ -126,17 +164,46 @@ const app = new Hono()
       },
     });
   })
-  .get("/messages/:projetoNome", sessionMiddleware, async (c) => {
-    const databases = c.get("databases");
-    const { projetoNome } = c.req.param();
+  .get(
+    "/messages/:projetoNome",
+    sessionMiddleware,
+    zValidator("query", z.object({ page: z.string(), totalItems: z.string() })),
+    async (c) => {
+      const databases = c.get("databases");
+      const { projetoNome } = c.req.param();
+      const { page, totalItems } = c.req.valid("query");
 
-    const messages = await databases.listDocuments<ProjetosMessages>(
+      const offSet = (parseInt(page) - 1) * parseInt(totalItems);
+      const limit = parseInt(totalItems);
+
+      const messages = await databases.listDocuments<ProjetosMessages>(
+        DATABASE_ID,
+        PROJETOS_MENSAGENS_ID,
+        [
+          Query.equal("projeto", projetoNome),
+          Query.limit(limit),
+          Query.offset(offSet),
+        ]
+      );
+
+      return c.json({ data: messages });
+    }
+  )
+  .get("/categorias/:projetoId", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const { projetoId } = c.req.param();
+
+    const projetoCategorias = await databases.listDocuments<ProjetosCategorias>(
       DATABASE_ID,
-      PROJETOS_MENSAGENS_ID,
-      [Query.equal("projeto", projetoNome)]
+      PROJETOS_CATEGORIAS_ID,
+      [
+        Query.equal("projeto_id", projetoId),
+        Query.orderAsc("nome"),
+        Query.limit(50),
+      ]
     );
 
-    return c.json({ data: messages });
+    return c.json({ data: projetoCategorias });
   })
   .post(
     "/",
@@ -200,6 +267,24 @@ const app = new Hono()
       return c.json({ data: projetoFinanca });
     }
   )
+  .post(
+    "/categorias",
+    sessionMiddleware,
+    zValidator("json", createProjetosCategoriasSchema),
+    async (c) => {
+      const databases = c.get("databases");
+      const values = c.req.valid("json");
+
+      const projetoCategoria = await databases.createDocument(
+        DATABASE_ID,
+        PROJETOS_CATEGORIAS_ID,
+        ID.unique(),
+        values
+      );
+
+      return c.json({ data: projetoCategoria });
+    }
+  )
   .patch(
     "/finance/:financeId",
     sessionMiddleware,
@@ -248,5 +333,17 @@ const app = new Hono()
     );
 
     return c.json({ data: { $id: financeId } });
+  })
+  .delete("/categorias/:categoriaId", sessionMiddleware, async (c) => {
+    const databases = c.get("databases");
+    const { categoriaId } = c.req.param();
+
+    await databases.deleteDocument(
+      DATABASE_ID,
+      PROJETOS_CATEGORIAS_ID,
+      categoriaId
+    );
+
+    return c.json({ data: { $id: categoriaId } });
   });
 export default app;

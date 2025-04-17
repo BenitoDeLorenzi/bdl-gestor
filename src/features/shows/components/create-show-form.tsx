@@ -33,6 +33,8 @@ import { ShowStatus } from "../types";
 import { DateTimePicker, TimePicker } from "@/components/date-time-picker";
 import { format, isValid, parseISO } from "date-fns";
 import { Tipos } from "@/features/tipos/types";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface CreateShowsFormProps {
   onCancel?: () => void;
@@ -59,6 +61,7 @@ export const CreateShowsForm = ({
   locaisOptions,
   projetosOptions,
 }: CreateShowsFormProps) => {
+  const router = useRouter();
   const { mutate, isPending } = useCreateShows();
 
   const form = useForm<z.infer<typeof createShowsSchema>>({
@@ -99,6 +102,25 @@ export const CreateShowsForm = ({
         onSuccess: () => {
           form.reset();
           onCancel?.();
+        },
+        onError: (error) => {
+          if (
+            error.message.includes("plano") ||
+            error.message.includes("Plano")
+          ) {
+            onCancel?.();
+            toast.warning(error.message, {
+              duration: Infinity,
+              action: {
+                label: "Planos",
+                onClick: () => {
+                  router.push("/planos");
+                },
+              },
+            });
+          } else {
+            toast.error(error.message);
+          }
         },
       }
     );
@@ -238,6 +260,7 @@ export const CreateShowsForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="A definir">A definir</SelectItem>
                         {locaisOptions.map((local) => (
                           <SelectItem key={local.id} value={local.id}>
                             {local.nome}

@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import { useCreateContratantes } from "../api/use-create-contratantes";
 
 import { createContratantesSchema } from "../schemas";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface CreateContratantesFormProps {
   onCancel?: () => void;
@@ -31,6 +33,7 @@ interface CreateContratantesFormProps {
 export const CreateContratantesForm = ({
   onCancel,
 }: CreateContratantesFormProps) => {
+  const router = useRouter();
   const { mutate, isPending } = useCreateContratantes();
   const form = useForm({
     resolver: zodResolver<z.infer<typeof createContratantesSchema>>(
@@ -45,7 +48,34 @@ export const CreateContratantesForm = ({
   });
 
   const onSubmit = (values: z.infer<typeof createContratantesSchema>) => {
-    mutate({ json: values });
+    mutate(
+      { json: values },
+      {
+        onSuccess: () => {
+          form.reset();
+          onCancel?.();
+        },
+        onError: (error) => {
+          if (
+            error.message.includes("plano") ||
+            error.message.includes("Plano")
+          ) {
+            onCancel?.();
+            toast.warning(error.message, {
+              duration: Infinity,
+              action: {
+                label: "Planos",
+                onClick: () => {
+                  router.push("/planos");
+                },
+              },
+            });
+          } else {
+            toast.error(error.message);
+          }
+        },
+      }
+    );
   };
 
   return (

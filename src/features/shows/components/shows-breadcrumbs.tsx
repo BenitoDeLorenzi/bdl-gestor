@@ -30,7 +30,7 @@ export const ShowsBreadCrumbs = ({ show }: ShowsBreadCrumbsProps) => {
       { param: { showId: show.$id } },
       {
         onSuccess: () => {
-          router.push("/shows");
+          router.push("/dashboard/shows");
         },
       }
     );
@@ -39,7 +39,7 @@ export const ShowsBreadCrumbs = ({ show }: ShowsBreadCrumbsProps) => {
   return (
     <div className="flex items-center gap-x-2">
       <ConfirmDialog />
-      <Link href={`/shows/`}>Shows</Link>
+      <Link href={`/dashboard/shows/`}>Shows</Link>
       <ChevronRight className="size-4 lg:size-5 text-muted-foreground" />
       <p className="font-semibold">
         {typeof show.local === "string" ? show.local : show.local.nome}

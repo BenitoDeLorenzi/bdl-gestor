@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 export const CreateTiposModal = () => {
   const { isOpen, setIsOpen, close } = useCreateTiposModal();
   const pathname = usePathname();
-  const tipo = pathname.split("/")[2];
+  const tipo = pathname.split("/")[3];
 
   return (
     <ResponsiveModal open={isOpen} onOpenChange={setIsOpen}>

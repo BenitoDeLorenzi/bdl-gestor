@@ -5,18 +5,53 @@ import { sessionMiddleware } from "@/lib/session-middleware";
 import { DATABASE_ID, EQUIPE_ID, SHOWS_ID } from "@/config";
 import { ID, Query } from "node-appwrite";
 import { Equipe } from "../types";
+import { z } from "zod";
+import { getCurrent } from "@/features/auth/queries";
+import { planMiddleware } from "@/lib/plan-middleware";
 
 const app = new Hono()
-  .get("/", sessionMiddleware, async (c) => {
-    const databases = c.get("databases");
-    const equipe = await databases.listDocuments<Equipe>(
-      DATABASE_ID,
-      EQUIPE_ID,
-      [Query.orderAsc("nome")]
-    );
+  .get(
+    "/",
+    sessionMiddleware,
+    zValidator(
+      "query",
+      z.object({
+        page: z.string(),
+        totalItems: z.string(),
+        funcao: z.string().nullish(),
+        instrumento: z.string().nullish(),
+        search: z.string().nullish(),
+      })
+    ),
+    async (c) => {
+      const user = await getCurrent();
+      const databases = c.get("databases");
+      const { page, totalItems, funcao, instrumento, search } =
+        c.req.valid("query");
 
-    return c.json({ data: equipe });
-  })
+      const offSet = (parseInt(page) - 1) * parseInt(totalItems);
+      const limit = parseInt(totalItems);
+
+      const query = [
+        Query.orderAsc("nome"),
+        Query.limit(limit),
+        Query.offset(offSet),
+        Query.equal("user_id", user?.$id || ""),
+      ];
+
+      if (funcao) query.push(Query.equal("funcao", funcao));
+      if (instrumento) query.push(Query.equal("instrumento", instrumento));
+      if (search) query.push(Query.contains("nome", search));
+
+      const equipe = await databases.listDocuments<Equipe>(
+        DATABASE_ID,
+        EQUIPE_ID,
+        query
+      );
+
+      return c.json({ data: equipe });
+    }
+  )
   .get("/:equipeId", sessionMiddleware, async (c) => {
     const { equipeId } = c.req.param();
     const databases = c.get("databases");
@@ -33,15 +68,17 @@ const app = new Hono()
     "/",
     zValidator("json", createEquipeSchema),
     sessionMiddleware,
+    planMiddleware,
     async (c) => {
+      const user = await getCurrent();
       const databases = c.get("databases");
-      const data = c.req.valid("json");
+      const values = c.req.valid("json");
 
       const equipe = await databases.createDocument(
         DATABASE_ID,
         EQUIPE_ID,
         ID.unique(),
-        data
+        { ...values, user_id: user?.$id }
       );
 
       return c.json({ data: equipe });

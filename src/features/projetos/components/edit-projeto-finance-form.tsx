@@ -29,6 +29,7 @@ import { DateTimePicker } from "@/components/date-time-picker";
 
 import { createProjetosFinanceSchema } from "../schemas";
 import {
+  ProjetosCategorias,
   ProjetosFinance,
   ProjetosFinanceFormaPagamento,
   ProjetosFinanceStatus,
@@ -39,6 +40,7 @@ import { useUpdateProjetosFinance } from "../api/use-update-projetos-finance";
 interface EditProjetosFinanceFormProps {
   onCancel?: () => void;
   initialValues: ProjetosFinance;
+  categorias: ProjetosCategorias[];
 }
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -54,6 +56,7 @@ const currencyParser = (value: string) => {
 export const EditProjetosFinanceForm = ({
   onCancel,
   initialValues,
+  categorias,
 }: EditProjetosFinanceFormProps) => {
   const { mutate, isPending } = useUpdateProjetosFinance();
 
@@ -68,6 +71,7 @@ export const EditProjetosFinanceForm = ({
       forma_pagamento: initialValues.forma_pagamento,
       descricao: initialValues.descricao,
       obecervacoes: initialValues.obecervacoes,
+      categoria: initialValues.categoria,
     },
   });
 
@@ -221,19 +225,49 @@ export const EditProjetosFinanceForm = ({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="descricao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descrição</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex items-center gap-2">
+              <FormField
+                control={form.control}
+                name="descricao"
+                render={({ field }) => (
+                  <FormItem className="w-2/3">
+                    <FormLabel>Descrição</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="categoria"
+                render={({ field }) => (
+                  <FormItem className="w-1/3">
+                    <FormLabel>Categoria</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a categoria" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categorias.map((categoria) => (
+                          <SelectItem
+                            key={categoria.$id}
+                            value={categoria.nome}
+                          >
+                            {categoria.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
