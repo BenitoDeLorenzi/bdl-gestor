@@ -6,7 +6,7 @@ import Stripe from "stripe";
 
 import { StripePrice } from "@/features/planos/types";
 
-export const stripe = new Stripe(STRIPE_SECRET_KEY || "");
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY! || "");
 
 export const getProductPrices = async (): Promise<StripePrice[]> => {
   const response = await stripe.prices.list({
